@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using DavinciJ15TokenBot.Models;
 using Microsoft.AspNetCore.Mvc;
+using Nethereum.Signer;
 using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -16,6 +17,8 @@ namespace DavinciJ15TokenBot.Controllers
     // ngrok http 5000 -host-header=localhost
     // 1343908176:AAEirQ_PVQscV8rCHDBHLSen2YzY04DAD_U
     // https://api.telegram.org/bot1343908176:AAEirQ_PVQscV8rCHDBHLSen2YzY04DAD_U/setWebhook?url=https://f06d16e3afe8.ngrok.io/api/bot
+
+    // https://api.telegram.org/bot1343908176:AAEirQ_PVQscV8rCHDBHLSen2YzY04DAD_U/setWebhook?url=https://davincij15tokenchecker.azurewebsites.net/api/bot
 
     // https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=0x5d269fac3B2e0552b0F34cdc253bDB427682A4b9&address=0x94e9A5A128f7B4af0BEeFe32F411F61d244759cE&tag=latest&apikey=W9BYDVCXB8UJZ7B3YXCNFIQGQC7BYW376M
 
@@ -34,7 +37,15 @@ namespace DavinciJ15TokenBot.Controllers
          [HttpGet]
          public async Task<IActionResult> Get()
         {
-            return this.Ok();
+
+            var signer1 = new EthereumMessageSigner();
+
+            var msg = "The address 0x94e9A5A128f7B4af0BEeFe32F411F61d244759cE belongs to Davincij15 and Davinci Codes LTD and so does the contract for the token DJ15.";
+            var signature = "0x1ad0694fceaeb5a72221e897f159644d0efdb5c5f86c9db90142f27a1d4560225e80eddcbce27991afda726390f8156aadc2971ddaf899a70098f39366f9ff8f1c";
+
+            var address = signer1.EncodeUTF8AndEcRecover(msg, signature);
+
+            return this.Ok(address);
         }
 
         // POST api/update
@@ -43,7 +54,7 @@ namespace DavinciJ15TokenBot.Controllers
         {
             var ethAddressLength = 42;
 
-            if(update.Message.Text.Length >= ethAddressLength && update.Message.Text.Contains("0x"))
+            if (update.Message.Text.Length >= ethAddressLength && update.Message.Text.Contains("0x"))
             {
                 // check balance
                 var etherscanApiKey = "W9BYDVCXB8UJZ7B3YXCNFIQGQC7BYW376M";
