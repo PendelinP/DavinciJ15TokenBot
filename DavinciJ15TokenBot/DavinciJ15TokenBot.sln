@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DavinciJ15TokenBot.MessageS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DavinciJ15TokenBot.DataManager.LiteDB", "..\DavinciJ15TokenBot.DataManager.LiteDB\DavinciJ15TokenBot.DataManager.LiteDB.csproj", "{44D687A4-F818-46BB-BA23-61ABF7A2C2BD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DavinciJ15TokenBot.EthereumConnector.EthNode", "..\DavinciJ15TokenBot.EthereumConnector.EthNode\DavinciJ15TokenBot.EthereumConnector.EthNode.csproj", "{EE13E2B7-7B8A-4CE7-93EC-63A506598EB9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{44D687A4-F818-46BB-BA23-61ABF7A2C2BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44D687A4-F818-46BB-BA23-61ABF7A2C2BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44D687A4-F818-46BB-BA23-61ABF7A2C2BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE13E2B7-7B8A-4CE7-93EC-63A506598EB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE13E2B7-7B8A-4CE7-93EC-63A506598EB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE13E2B7-7B8A-4CE7-93EC-63A506598EB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE13E2B7-7B8A-4CE7-93EC-63A506598EB9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
