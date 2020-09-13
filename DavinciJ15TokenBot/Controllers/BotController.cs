@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using DavinciJ15TokenBot.Common;
 using DavinciJ15TokenBot.Common.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -62,12 +63,11 @@ namespace DavinciJ15TokenBot.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Update update)
         {
-            var ethAddressLength = 42;
 
-            if (update.Message.Text.Length >= ethAddressLength && update.Message.Text.Contains("0x"))
+            if (update.Message.Text.Length >= BaseDefinitions.EthAddressLength && update.Message.Text.Contains(BaseDefinitions.EthAddressStartIdentifier))
             {
-                var addressIdx = update.Message.Text.IndexOf("0x");
-                var address = update.Message.Text.Substring(addressIdx, ethAddressLength);
+                var addressIdx = update.Message.Text.IndexOf(BaseDefinitions.EthAddressStartIdentifier);
+                var address = update.Message.Text.Substring(addressIdx, BaseDefinitions.EthAddressLength);
 
                 var contractAddress = this.configuration["TokenContractAddress"];
                 var tokenDecimals = int.Parse(this.configuration["TokenDecimals"]);
