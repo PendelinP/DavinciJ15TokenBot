@@ -3,7 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30128.74
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DavinciJ15TokenBot", "DavinciJ15TokenBot.csproj", "{06CD366D-EC5E-4404-AA4E-498BBA8AAD3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DavinciJ15TokenBot", "DavinciJ15TokenBot.csproj", "{06CD366D-EC5E-4404-AA4E-498BBA8AAD3F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DavinciJ15TokenBot.Common", "..\DavinciJ15TokenBot.Common\DavinciJ15TokenBot.Common.csproj", "{5E069D5F-73B5-47B5-BFF4-D3E9E571F593}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DavinciJ15TokenBot.EthereumConnector.Etherscan", "..\DavinciJ15TokenBot.EthereumConnector.Etherscan\DavinciJ15TokenBot.EthereumConnector.Etherscan.csproj", "{1F7F8569-A166-45E5-9BE4-9B8BAC789388}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DavinciJ15TokenBot.MessageSigner.Nethereum", "..\DavinciJ15TokenBot.MessageSigner.Nethereum\DavinciJ15TokenBot.MessageSigner.Nethereum.csproj", "{C37B1FBC-5312-447F-9E10-CC9402843919}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DavinciJ15TokenBot.DataManager.LiteDB", "..\DavinciJ15TokenBot.DataManager.LiteDB\DavinciJ15TokenBot.DataManager.LiteDB.csproj", "{44D687A4-F818-46BB-BA23-61ABF7A2C2BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +23,22 @@ Global
 		{06CD366D-EC5E-4404-AA4E-498BBA8AAD3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06CD366D-EC5E-4404-AA4E-498BBA8AAD3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06CD366D-EC5E-4404-AA4E-498BBA8AAD3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E069D5F-73B5-47B5-BFF4-D3E9E571F593}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E069D5F-73B5-47B5-BFF4-D3E9E571F593}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E069D5F-73B5-47B5-BFF4-D3E9E571F593}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E069D5F-73B5-47B5-BFF4-D3E9E571F593}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F7F8569-A166-45E5-9BE4-9B8BAC789388}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F7F8569-A166-45E5-9BE4-9B8BAC789388}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F7F8569-A166-45E5-9BE4-9B8BAC789388}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F7F8569-A166-45E5-9BE4-9B8BAC789388}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C37B1FBC-5312-447F-9E10-CC9402843919}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C37B1FBC-5312-447F-9E10-CC9402843919}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C37B1FBC-5312-447F-9E10-CC9402843919}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C37B1FBC-5312-447F-9E10-CC9402843919}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44D687A4-F818-46BB-BA23-61ABF7A2C2BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44D687A4-F818-46BB-BA23-61ABF7A2C2BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44D687A4-F818-46BB-BA23-61ABF7A2C2BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44D687A4-F818-46BB-BA23-61ABF7A2C2BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

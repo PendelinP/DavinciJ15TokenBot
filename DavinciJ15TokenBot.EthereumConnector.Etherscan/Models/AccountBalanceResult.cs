@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 
-namespace DavinciJ15TokenBot.Models
+namespace DavinciJ15TokenBot.EthereumConnector.Etherscan.Models
 {
-    public class AccountBalanceResult
+    internal class AccountBalanceResult
     {
         public string Status { get; set; }
 

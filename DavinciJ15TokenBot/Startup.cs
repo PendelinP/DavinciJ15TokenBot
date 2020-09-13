@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DavinciJ15TokenBot.Common.Interfaces;
+using DavinciJ15TokenBot.EthereumConnector.Etherscan;
+using DavinciJ15TokenBot.MessageSigner.Nethereum;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -28,6 +31,11 @@ namespace DavinciJ15TokenBot
             services
                 .AddControllers()
                 .AddNewtonsoftJson();
+
+            services.AddHttpClient();
+
+            services.AddScoped<IEthereumMessageSigner, NethereumMessageSigner>();
+            services.AddScoped<IEthereumConnector, EtherscanEthereumConnector>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
