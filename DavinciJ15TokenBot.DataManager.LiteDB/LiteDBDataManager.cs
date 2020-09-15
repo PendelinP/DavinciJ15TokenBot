@@ -23,5 +23,15 @@ namespace DavinciJ15TokenBot.DataManager.LiteDB
         {
             throw new NotImplementedException();
         }
+
+        public Task<Member> GetMemberByAddressAsync(string adddress)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Member> GetMemberByTelegramIdAsync(int telegramId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

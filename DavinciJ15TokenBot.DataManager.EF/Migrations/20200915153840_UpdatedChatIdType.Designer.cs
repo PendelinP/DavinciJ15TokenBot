@@ -4,14 +4,16 @@ using DavinciJ15TokenBot.DataManager.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DavinciJ15TokenBot.DataManager.EF.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20200915153840_UpdatedChatIdType")]
+    partial class UpdatedChatIdType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,9 +26,6 @@ namespace DavinciJ15TokenBot.DataManager.EF.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Address")
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal?>("Amount")
                         .HasColumnType("decimal(18,2)");
@@ -50,17 +49,6 @@ namespace DavinciJ15TokenBot.DataManager.EF.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Address")
-                        .IsUnique()
-                        .HasFilter("[Address] IS NOT NULL");
-
-                    b.HasIndex("TelegramChatId")
-                        .IsUnique()
-                        .HasFilter("[TelegramChatId] IS NOT NULL");
-
-                    b.HasIndex("TelegramId")
-                        .IsUnique();
 
                     b.ToTable("Members");
                 });

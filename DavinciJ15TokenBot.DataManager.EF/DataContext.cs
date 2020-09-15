@@ -26,6 +26,18 @@ namespace DavinciJ15TokenBot.DataManager.EF
 
             entity
                 .HasKey(p => p.Id);
+
+            entity
+                .HasIndex(p => p.TelegramId)
+                .IsUnique();
+
+            entity
+                .HasIndex(p => p.TelegramChatId)
+                .IsUnique();
+
+            entity
+                .HasIndex(p => p.Address)
+                .IsUnique();
         }
     }
 }

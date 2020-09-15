@@ -4,14 +4,16 @@ using DavinciJ15TokenBot.DataManager.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DavinciJ15TokenBot.DataManager.EF.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20200915153118_AddedChatIdToMember")]
+    partial class AddedChatIdToMember
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,42 +27,25 @@ namespace DavinciJ15TokenBot.DataManager.EF.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Address")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<decimal?>("Amount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("LastCheckedUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("MemberSinceUtc")
+                    b.Property<DateTime>("MemberSinceUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("RegistrationValidSinceUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("TelegramChatId")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("TelegramChatId")
+                        .HasColumnType("int");
 
                     b.Property<int>("TelegramId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Address")
-                        .IsUnique()
-                        .HasFilter("[Address] IS NOT NULL");
-
-                    b.HasIndex("TelegramChatId")
-                        .IsUnique()
-                        .HasFilter("[TelegramChatId] IS NOT NULL");
-
-                    b.HasIndex("TelegramId")
-                        .IsUnique();
 
                     b.ToTable("Members");
                 });

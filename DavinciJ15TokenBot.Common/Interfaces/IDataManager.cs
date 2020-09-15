@@ -12,6 +12,10 @@ namespace DavinciJ15TokenBot.Common.Interfaces
 
         Task DeleteMemberByTelegramIdAsync(int telegramId);
 
+        Task<Member> GetMemberByTelegramIdAsync(int telegramId);
+
+        Task<Member> GetMemberByAddressAsync(string adddress);
+
         Task<IEnumerable<Member>> GetAllMembersAsync();
     }
 }

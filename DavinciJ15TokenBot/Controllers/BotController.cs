@@ -45,60 +45,112 @@ namespace DavinciJ15TokenBot.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Update update)
         {
+            // don't react of anything else than messages
+            if(update.Type != Telegram.Bot.Types.Enums.UpdateType.Message)
+            {
+                return this.Ok();
+            }
+
+            var message = update.Message;
+
             // the user has to contact the bot via PN - see this
             https://stackoverflow.com/q/49965738/1820522
 
             // onboard new members
-            if (update?.Message?.Type == Telegram.Bot.Types.Enums.MessageType.ChatMembersAdded && update?.Message?.NewChatMembers != null)
+            if (message.Type == Telegram.Bot.Types.Enums.MessageType.ChatMembersAdded && message.NewChatMembers != null)
             {
-                foreach (var m in update.Message.NewChatMembers)
+                foreach (var m in message.NewChatMembers)
                 {
-                    await this.dataManager.AddOrUpdateMemberAsync(new Member
+                    var member = await this.dataManager.GetMemberByTelegramIdAsync(m.Id);
+
+                    // if the member is new, create - otherwise update props
+                    if (member == null)
                     {
-                        TelegramId = m.Id,
-                        Name = m.Username,
-                        MemberSinceUtc = DateTime.UtcNow
-                    });
+                        member = new Member
+                        {
+                            TelegramId = m.Id,
+                        };
+                    }
+
+                    member.Name = m.Username;
+                    member.MemberSinceUtc = DateTime.UtcNow;
+
+                    await this.dataManager.AddOrUpdateMemberAsync(member);
                 }
             }
 
             // members leaving
-            if (update?.Message?.Type == Telegram.Bot.Types.Enums.MessageType.ChatMemberLeft && update?.Message?.LeftChatMember != null)
+            if (message.Type == Telegram.Bot.Types.Enums.MessageType.ChatMemberLeft && message.LeftChatMember != null)
             {
-                var leftMember = update.Message.LeftChatMember;
+                var leftMember = message.LeftChatMember;
 
                 await this.dataManager.DeleteMemberByTelegramIdAsync(leftMember.Id);
             }
 
-            // react on private messages
-            if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message && update.Message.Chat.Id != this.channelChatId)
+            // react on private messages (registration process)
+            if (message.Chat.Id != this.channelChatId)
             {
-                if (this.SeemsToBeASignedMessage(update.Message.Text))
+                if (this.SeemsToBeASignedMessage(message.Text))
                 {
                     try
                     {
                         var contractAddress = this.configuration["TokenContractAddress"];
                         var tokenDecimals = int.Parse(this.configuration["TokenDecimals"]);
                         
-                        var result = ParseIncomingBotMessage(update.Message.Text);
+                        var result = ParseIncomingBotMessage(message.Text);
 
-                        var balance = await this.ethereumConnector.GetAccountBalanceAsync(result.Address, contractAddress, tokenDecimals);
+                        var addressUsedForSigning = this.ethereumMessageSigner.GetAddressFromSignedMessage(result.Message, result.Signature);
 
-                        await this.client.SendTextMessageAsync(update.Message.Chat.Id, "Your token account balance is: " + Math.Round(balance, 2));
+                        if (result.Address != addressUsedForSigning)
+                        {
+                            await this.client.SendTextMessageAsync(message.Chat.Id, $"The given address does not match with your signature address (you signed with {addressUsedForSigning}). Please try again.");
+                            return this.Ok();
+                        }
+
+                        var memberWithAddress = await this.dataManager.GetMemberByAddressAsync(result.Address);
+
+                        // check if address is already registered
+                        if (memberWithAddress.TelegramId != message.From.Id)
+                        {
+                            await this.client.SendTextMessageAsync(message.Chat.Id, $"Nice try but this address is already registered ;)");
+                            return this.Ok();
+                        }
+
+                        var member = await this.dataManager.GetMemberByTelegramIdAsync(message.From.Id);
+
+                        // if the member is new, create - otherwise update props
+                        if (member == null)
+                        {
+                            member = new Member
+                            {
+                                TelegramId = message.From.Id
+                            };
+                        }
+
+                        member.Name = message.From.Username;
+                        member.RegistrationValidSinceUtc = DateTime.UtcNow;
+                        member.TelegramChatId = message.Chat.Id;
+                        member.Address = result.Address;
+
+                        await this.dataManager.AddOrUpdateMemberAsync(member);
+
+                        // var balance = await this.ethereumConnector.GetAccountBalanceAsync(result.Address, contractAddress, tokenDecimals);
+
+                        await this.client.SendTextMessageAsync(message.Chat.Id, "Your address registration was successful. Please ensure to hold DJ15 tokens to be a member of the group.");
                     } 
                     catch (SignedMessageParsingError error)
                     {
-                        await this.client.SendTextMessageAsync(update.Message.Chat.Id, "Something went wrong.\n\n" + error.Message + "\n\nPlease try again.");
+                        await this.client.SendTextMessageAsync(message.Chat.Id, $"Something went wrong.\n\n{error.Message}\n\nPlease try again.");
                     }
                 }
-                else
+                else // no signed message - show personal welcome message
                 {
-                    await this.client.SendTextMessageAsync(update.Message.Chat.Id, this.configuration["BotWelcomeMessage"]);
+                    await this.client.SendTextMessageAsync(message.Chat.Id, this.configuration["BotWelcomeMessage"]);
                 }
             } 
-            else // group join
+            else // group join - show welcome message
             {
-                await this.client.SendTextMessageAsync(update.Message.Chat.Id, this.configuration["ChannelWelcomeMessage"]);
+                await this.client.SendTextMessageAsync(message.Chat.Id, this.configuration["ChannelWelcomeMessage"]);
             }
 
             return this.Ok();
@@ -141,7 +193,7 @@ namespace DavinciJ15TokenBot.Controllers
 
             if (addressIdx < 0)
             {
-                throw new SignedMessageParsingError("The given address within your signed message seems to be incorrect. Please use valid ETH addresses.");
+                throw new SignedMessageParsingError("The given address within your signed message seems to be incorrect. Please use a valid ETH address.");
             }
 
             var address = messagePart.Substring(addressIdx, BaseDefinitions.EthAddressLength);

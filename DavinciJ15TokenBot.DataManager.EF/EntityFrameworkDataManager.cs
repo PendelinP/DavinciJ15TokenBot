@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 namespace DavinciJ15TokenBot.DataManager.EF
 {
     public class EntityFrameworkDataManager : IDataManager
+
     {
         private readonly Func<DataContext> contextFactory;
 
@@ -31,9 +32,15 @@ namespace DavinciJ15TokenBot.DataManager.EF
                 {
                     var existingMember = await context.Members.SingleOrDefaultAsync(p => p.Id == member.Id);
 
+                    // don't update telegram id - this is unique
+
                     existingMember.Amount = member.Amount;
                     existingMember.LastCheckedUtc = member.LastCheckedUtc;
                     existingMember.Name = member.Name;
+                    existingMember.RegistrationValidSinceUtc = member.RegistrationValidSinceUtc;
+                    existingMember.Address = member.Address;
+                    existingMember.MemberSinceUtc = member.MemberSinceUtc;
+                    existingMember.TelegramChatId = member.TelegramChatId;
                 }
 
                 await context.SaveChangesAsync();
@@ -60,6 +67,26 @@ namespace DavinciJ15TokenBot.DataManager.EF
             using (var context = this.contextFactory())
             {
                 return await context.Members.ToListAsync();
+            }
+        }
+
+        public async Task<Member> GetMemberByAddressAsync(string adddress)
+        {
+            using (var context = this.contextFactory())
+            {
+                var member = await context.Members.SingleOrDefaultAsync(p => p.Address == adddress);
+
+                return member;
+            }
+        }
+
+        public async Task<Member> GetMemberByTelegramIdAsync(int telegramId)
+        {
+            using (var context = this.contextFactory())
+            {
+                var member = await context.Members.SingleOrDefaultAsync(p => p.TelegramId == telegramId);
+
+                return member;
             }
         }
     }
