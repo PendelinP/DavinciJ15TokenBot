@@ -6,17 +6,19 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Telegram.Bot" Version="15.7.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DavinciJ15TokenBot.Common\DavinciJ15TokenBot.Common.csproj" />
+    <ProjectReference Include="..\DavinciJ15TokenBot.DataManager.EF\DavinciJ15TokenBot.DataManager.EF.csproj" />
     <ProjectReference Include="..\DavinciJ15TokenBot.EthereumConnector.Etherscan\DavinciJ15TokenBot.EthereumConnector.Etherscan.csproj" />
     <ProjectReference Include="..\DavinciJ15TokenBot.MessageSigner.Nethereum\DavinciJ15TokenBot.MessageSigner.Nethereum.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\" />
   </ItemGroup>
 
 
