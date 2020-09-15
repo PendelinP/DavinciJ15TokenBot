@@ -21,17 +21,30 @@ namespace DavinciJ15TokenBot.DataManager.EF
         {
             using (var context = this.contextFactory())
             {
-                context.Members.Add(member);
+                if (member.Id == default)
+                {
+                    member.Id = Guid.NewGuid();
+
+                    context.Members.Add(member);
+                }
+                else
+                {
+                    var existingMember = await context.Members.SingleOrDefaultAsync(p => p.Id == member.Id);
+
+                    existingMember.Amount = member.Amount;
+                    existingMember.LastCheckedUtc = member.LastCheckedUtc;
+                    existingMember.Name = member.Name;
+                }
 
                 await context.SaveChangesAsync();
             }
         }
 
-        public async Task DeleteMemberAsync(int memberId)
+        public async Task DeleteMemberByTelegramIdAsync(int telegramId)
         {
             using (var context = this.contextFactory())
             {
-                var member = await context.Members.SingleOrDefaultAsync(p => p.Id == memberId);
+                var member = await context.Members.SingleOrDefaultAsync(p => p.TelegramId == telegramId);
 
                 if (member != null)
                 {

@@ -6,7 +6,9 @@ namespace DavinciJ15TokenBot.Common.Models
 {
     public class Member
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
+
+        public int TelegramId { get; set; }
 
         public string Name { get; set; }
 

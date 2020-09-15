@@ -76,23 +76,23 @@ namespace DavinciJ15TokenBot.Controllers
             https://stackoverflow.com/questions/49965738/telegram-bot-initiate-conversation-with-a-user#:~:text=Telegram%20Bots%20can't%20initiate,no%20way%20to%20around%20this.
 
             // onboard new members
-            if (update.Type == Telegram.Bot.Types.Enums.UpdateType.ChannelPost && update.ChannelPost.Type == Telegram.Bot.Types.Enums.MessageType.ChatMembersAdded)
+            if (update?.Message?.Type == Telegram.Bot.Types.Enums.MessageType.ChatMembersAdded && update?.Message?.NewChatMembers != null)
             {
-                foreach(var m in update.ChannelPost.NewChatMembers)
+                foreach(var m in update.Message.NewChatMembers)
                 {
                     await this.dataManager.AddOrUpdateMemberAsync(new Member { 
-                        Id = m.Id,
+                        TelegramId = m.Id,
                         Name = m.Username
                     });
                 }
             }
 
             // members leaving
-            if (update.Type == Telegram.Bot.Types.Enums.UpdateType.ChannelPost && update.ChannelPost.Type == Telegram.Bot.Types.Enums.MessageType.ChatMemberLeft)
+            if (update?.Message?.Type == Telegram.Bot.Types.Enums.MessageType.ChatMemberLeft && update?.Message?.LeftChatMember != null)
             {
-                var leftMember = update.ChannelPost.LeftChatMember;
+                var leftMember = update.Message.LeftChatMember;
 
-                await this.dataManager.DeleteMemberAsync(leftMember.Id);
+                await this.dataManager.DeleteMemberByTelegramIdAsync(leftMember.Id);
             }
 
             // only react on private messages

@@ -11,11 +11,11 @@ namespace DavinciJ15TokenBot.DataManager.EF.Migrations
                 name: "Members",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(nullable: false),
+                    TelegramId = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true),
-                    Amount = table.Column<decimal>(nullable: false),
-                    LastCheckedUtc = table.Column<DateTime>(nullable: false)
+                    Amount = table.Column<decimal>(nullable: true),
+                    LastCheckedUtc = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {

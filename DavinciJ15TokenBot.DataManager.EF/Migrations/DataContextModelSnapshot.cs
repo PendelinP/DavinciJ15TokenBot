@@ -21,10 +21,9 @@ namespace DavinciJ15TokenBot.DataManager.EF.Migrations
 
             modelBuilder.Entity("DavinciJ15TokenBot.Common.Models.Member", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal?>("Amount")
                         .HasColumnType("decimal(18,2)");
@@ -34,6 +33,9 @@ namespace DavinciJ15TokenBot.DataManager.EF.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TelegramId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

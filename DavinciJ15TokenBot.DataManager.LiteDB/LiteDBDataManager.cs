@@ -9,12 +9,12 @@ namespace DavinciJ15TokenBot.DataManager.LiteDB
 {
     public class LiteDBDataManager : IDataManager
     {
-        public Task<Member> AddOrUpdateMemberAsync(Member member)
+        public Task AddOrUpdateMemberAsync(Member member)
         {
             throw new NotImplementedException();
         }
 
-        public Task DeleteMemberAsync(int memberId)
+        public Task DeleteMemberByTelegramIdAsync(int telegramId)
         {
             throw new NotImplementedException();
         }
