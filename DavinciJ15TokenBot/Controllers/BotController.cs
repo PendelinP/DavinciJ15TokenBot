@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using DavinciJ15TokenBot.Common;
+﻿using DavinciJ15TokenBot.Common;
 using DavinciJ15TokenBot.Common.Interfaces;
 using DavinciJ15TokenBot.Common.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Nethereum.Signer;
 using Newtonsoft.Json;
+using System;
+using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace DavinciJ15TokenBot.Controllers
 {
@@ -50,23 +44,12 @@ namespace DavinciJ15TokenBot.Controllers
             this.channelChatId = long.Parse(this.configuration["ChannelChatId"]);
         }
 
-         [HttpGet]
-         public async Task<IActionResult> Get()
+        [HttpGet]
+        public async Task<IActionResult> Get()
         {
-            //var msg = "The address 0x94e9A5A128f7B4af0BEeFe32F411F61d244759cE belongs to Davincij15 and Davinci Codes LTD and so does the contract for the token DJ15.";
-            //var signature = "0x1ad0694fceaeb5a72221e897f159644d0efdb5c5f86c9db90142f27a1d4560225e80eddcbce27991afda726390f8156aadc2971ddaf899a70098f39366f9ff8f1c";
-
-            //var address = this.ethereumMessageSigner.GetAddressFromSignedMessage(msg, signature);
-
-            //var contractAddress = this.configuration["TokenContractAddress"];
-            //var tokenDecimals = int.Parse(this.configuration["TokenDecimals"]);
-
-            //var balance = await this.ethereumConnector.GetAccountBalanceAsync(address, contractAddress, tokenDecimals);
-
             var members = await this.dataManager.GetAllMembersAsync();
 
-            // return this.Ok(address + ":" + balance);
-            return this.Ok();
+            return this.Ok(JsonConvert.SerializeObject(members, Formatting.Indented));
         }
 
         // POST api/update
@@ -78,11 +61,13 @@ namespace DavinciJ15TokenBot.Controllers
             // onboard new members
             if (update?.Message?.Type == Telegram.Bot.Types.Enums.MessageType.ChatMembersAdded && update?.Message?.NewChatMembers != null)
             {
-                foreach(var m in update.Message.NewChatMembers)
+                foreach (var m in update.Message.NewChatMembers)
                 {
-                    await this.dataManager.AddOrUpdateMemberAsync(new Member { 
+                    await this.dataManager.AddOrUpdateMemberAsync(new Member
+                    {
                         TelegramId = m.Id,
-                        Name = m.Username
+                        Name = m.Username,
+                        MemberSinceUtc = DateTime.UtcNow
                     });
                 }
             }
@@ -95,27 +80,88 @@ namespace DavinciJ15TokenBot.Controllers
                 await this.dataManager.DeleteMemberByTelegramIdAsync(leftMember.Id);
             }
 
-            // only react on private messages
+            // react on private messages
             if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message && update.Message.Chat.Id != this.channelChatId)
             {
-                if (update.Message.Text.Length >= BaseDefinitions.EthAddressLength && update.Message.Text.Contains(BaseDefinitions.EthAddressStartIdentifier))
+                if (this.SeemsToBeASignedMessage(update.Message.Text))
                 {
-                    var addressIdx = update.Message.Text.IndexOf(BaseDefinitions.EthAddressStartIdentifier);
-                    var address = update.Message.Text.Substring(addressIdx, BaseDefinitions.EthAddressLength);
+                    try
+                    {
+                        var contractAddress = this.configuration["TokenContractAddress"];
+                        var tokenDecimals = int.Parse(this.configuration["TokenDecimals"]);
+                        
+                        var result = ParseIncomingBotMessage(update.Message.Text);
 
-                    var contractAddress = this.configuration["TokenContractAddress"];
-                    var tokenDecimals = int.Parse(this.configuration["TokenDecimals"]);
+                        var balance = await this.ethereumConnector.GetAccountBalanceAsync(result.Address, contractAddress, tokenDecimals);
 
-                    var balance = await this.ethereumConnector.GetAccountBalanceAsync(address, contractAddress, tokenDecimals);
-
-                    await this.client.SendTextMessageAsync(update.Message.Chat.Id, "Your token account balance is: " + Math.Round(balance, 2));
+                        await this.client.SendTextMessageAsync(update.Message.Chat.Id, "Your token account balance is: " + Math.Round(balance, 2));
+                    } 
+                    catch (SignedMessageParsingError error)
+                    {
+                        await this.client.SendTextMessageAsync(update.Message.Chat.Id, "Something went wrong.\n\n" + error.Message + "\n\nPlease try again.");
+                    }
                 }
                 else
                 {
-                    await this.client.SendTextMessageAsync(update.Message.Chat.Id, "Welcome to the DavinciJ15 token checker bot. Please enter your Ethereum address (e.g. 0x94e9A5A128f7B4af0BEeFe32F411F61d244759cE).");
+                    await this.client.SendTextMessageAsync(update.Message.Chat.Id, this.configuration["BotWelcomeMessage"]);
                 }
+            } 
+            else // group join
+            {
+                await this.client.SendTextMessageAsync(update.Message.Chat.Id, this.configuration["ChannelWelcomeMessage"]);
             }
+
             return this.Ok();
+        }
+
+        private bool SeemsToBeASignedMessage(string message)
+        {
+            return 
+                message.Length >= (BaseDefinitions.EthAddressLength * 2) && 
+                message.Contains(BaseDefinitions.EthAddressAndSignatureStartIdentifier);
+        }
+
+        private BotMessageToCheck ParseIncomingBotMessage(string message)
+        {
+            message = message.Trim();
+
+            var messagePartEnd = message.IndexOf("\"", 1);
+
+            if (messagePartEnd < BaseDefinitions.EthAddressLength)
+            {
+                throw new SignedMessageParsingError("The given message seems to be incorrect. Please note that the message to sign has to be stated within \" symbols (e.g. \"I have DJ15 Tokens at <Your Ethereum Address>\").");
+            }
+
+            var messagePart = message.Substring(1, messagePartEnd - 1).Trim();
+
+            if (messagePart.Length < BaseDefinitions.EthAddressLength)
+            {
+                throw new SignedMessageParsingError("The given message seems to be incorrect. Is your ETH-Address missing?");
+            }
+
+            var signaturePart = message.Substring(messagePartEnd + 1).Trim();
+
+            if (signaturePart.Length < BaseDefinitions.EthAddressLength || 
+                !signaturePart.StartsWith(BaseDefinitions.EthAddressAndSignatureStartIdentifier))
+            {
+                throw new SignedMessageParsingError("The given signature seems to be incorrect.");
+            }
+
+            var addressIdx = messagePart.IndexOf(BaseDefinitions.EthAddressAndSignatureStartIdentifier);
+
+            if (addressIdx < 0)
+            {
+                throw new SignedMessageParsingError("The given address within your signed message seems to be incorrect. Please use valid ETH addresses.");
+            }
+
+            var address = messagePart.Substring(addressIdx, BaseDefinitions.EthAddressLength);
+
+            return new BotMessageToCheck
+            {
+                Message = messagePart,
+                Address = address,
+                Signature = signaturePart
+            };
         }
     }
 }

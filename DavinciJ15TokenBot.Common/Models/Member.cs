@@ -15,5 +15,7 @@ namespace DavinciJ15TokenBot.Common.Models
         public decimal? Amount { get; set; }
 
         public DateTime? LastCheckedUtc { get; set; }
+
+        public DateTime MemberSinceUtc { get; set; }
     }
 }

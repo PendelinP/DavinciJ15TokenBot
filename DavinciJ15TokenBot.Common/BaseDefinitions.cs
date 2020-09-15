@@ -7,7 +7,7 @@ namespace DavinciJ15TokenBot.Common
     public class BaseDefinitions
     {
         public const int EthAddressLength = 42;
-        public const string EthAddressStartIdentifier = "0x";
+        public const string EthAddressAndSignatureStartIdentifier = "0x";
 
     }
 }
