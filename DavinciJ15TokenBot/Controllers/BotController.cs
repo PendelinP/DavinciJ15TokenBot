@@ -77,6 +77,10 @@ namespace DavinciJ15TokenBot.Controllers
 
                     await this.dataManager.AddOrUpdateMemberAsync(member);
                 }
+
+                await this.client.SendTextMessageAsync(message.Chat.Id, this.configuration["ChannelWelcomeMessage"]);
+
+                return this.Ok();
             }
 
             // members leaving
@@ -92,8 +96,13 @@ namespace DavinciJ15TokenBot.Controllers
             // react on private messages (registration process)
             if (message.Chat.Id != this.channelChatId)
             {
-                if (this.SeemsToBeASignedMessage(message.Text))
+                // no signed message - show personal welcome message with registration guide
+                if (!this.SeemsToBeASignedMessage(message.Text))
                 {
+                    await this.client.SendTextMessageAsync(message.Chat.Id, this.configuration["BotWelcomeMessage"]);
+                }
+                else // message contains address and signature information - try to complete registration
+                { 
                     try
                     {
                         var contractAddress = this.configuration["TokenContractAddress"];
@@ -145,15 +154,7 @@ namespace DavinciJ15TokenBot.Controllers
                         await this.client.SendTextMessageAsync(message.Chat.Id, $"Something went wrong.\n\n{error.Message}\n\nPlease try again.");
                     }
                 }
-                else // no signed message - show personal welcome message
-                {
-                    await this.client.SendTextMessageAsync(message.Chat.Id, this.configuration["BotWelcomeMessage"]);
-                }
             } 
-            else // group join - show welcome message
-            {
-                await this.client.SendTextMessageAsync(message.Chat.Id, this.configuration["ChannelWelcomeMessage"]);
-            }
 
             return this.Ok();
         }
