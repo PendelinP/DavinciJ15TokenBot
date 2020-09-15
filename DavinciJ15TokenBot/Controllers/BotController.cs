@@ -85,6 +85,8 @@ namespace DavinciJ15TokenBot.Controllers
                 var leftMember = message.LeftChatMember;
 
                 await this.dataManager.DeleteMemberByTelegramIdAsync(leftMember.Id);
+
+                return this.Ok();
             }
 
             // react on private messages (registration process)
@@ -110,7 +112,7 @@ namespace DavinciJ15TokenBot.Controllers
                         var memberWithAddress = await this.dataManager.GetMemberByAddressAsync(result.Address);
 
                         // check if address is already registered
-                        if (memberWithAddress.TelegramId != message.From.Id)
+                        if (memberWithAddress != null && memberWithAddress.TelegramId != message.From.Id)
                         {
                             await this.client.SendTextMessageAsync(message.Chat.Id, $"Nice try but this address is already registered ;)");
                             return this.Ok();
@@ -136,7 +138,7 @@ namespace DavinciJ15TokenBot.Controllers
 
                         // var balance = await this.ethereumConnector.GetAccountBalanceAsync(result.Address, contractAddress, tokenDecimals);
 
-                        await this.client.SendTextMessageAsync(message.Chat.Id, "Your address registration was successful. Please ensure to hold DJ15 tokens to be a member of the group.");
+                        await this.client.SendTextMessageAsync(message.Chat.Id, this.configuration["RegistrationSuccessfulMessage"]);
                     } 
                     catch (SignedMessageParsingError error)
                     {
@@ -171,14 +173,14 @@ namespace DavinciJ15TokenBot.Controllers
 
             if (messagePartEnd < BaseDefinitions.EthAddressLength)
             {
-                throw new SignedMessageParsingError("The given message seems to be incorrect. Please note that the message to sign has to be stated within \" symbols (e.g. \"I have DJ15 Tokens at <Your Ethereum Address>\").");
+                throw new SignedMessageParsingError($"The given message seems to be incorrect. Please note that the message to sign has to be stated within \" symbols (e.g. {this.configuration["SampleMessageValidationError"]}).");
             }
 
             var messagePart = message.Substring(1, messagePartEnd - 1).Trim();
 
             if (messagePart.Length < BaseDefinitions.EthAddressLength)
             {
-                throw new SignedMessageParsingError("The given message seems to be incorrect. Is your ETH-Address missing?");
+                throw new SignedMessageParsingError("The given message seems to be incorrect. Is your Ethereum Address missing?");
             }
 
             var signaturePart = message.Substring(messagePartEnd + 1).Trim();
@@ -193,7 +195,7 @@ namespace DavinciJ15TokenBot.Controllers
 
             if (addressIdx < 0)
             {
-                throw new SignedMessageParsingError("The given address within your signed message seems to be incorrect. Please use a valid ETH address.");
+                throw new SignedMessageParsingError("The given address within your signed message seems to be incorrect. Please use a valid Ethereum address.");
             }
 
             var address = messagePart.Substring(addressIdx, BaseDefinitions.EthAddressLength);
