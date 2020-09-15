@@ -45,7 +45,8 @@ namespace DavinciJ15TokenBot.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Update update)
         {
-            https://stackoverflow.com/questions/49965738/telegram-bot-initiate-conversation-with-a-user#:~:text=Telegram%20Bots%20can't%20initiate,no%20way%20to%20around%20this.
+            // the user has to contact the bot via PN - see this
+            https://stackoverflow.com/q/49965738/1820522
 
             // onboard new members
             if (update?.Message?.Type == Telegram.Bot.Types.Enums.MessageType.ChatMembersAdded && update?.Message?.NewChatMembers != null)
