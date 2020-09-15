@@ -351,3 +351,6 @@ MigrationBackup/
 
 # Dev-Settings
 appsettings.Development.json
+
+# Misc
+notes.txt

@@ -11,17 +11,6 @@ using Telegram.Bot.Types;
 
 namespace DavinciJ15TokenBot.Controllers
 {
-    // ngrok http 5000 -host-header=localhost
-    // 1343908176:AAEirQ_PVQscV8rCHDBHLSen2YzY04DAD_U
-    // https://api.telegram.org/bot1343908176:AAEirQ_PVQscV8rCHDBHLSen2YzY04DAD_U/setWebhook?url=https://f06d16e3afe8.ngrok.io/api/bot
-
-    // https://api.telegram.org/bot1343908176:AAEirQ_PVQscV8rCHDBHLSen2YzY04DAD_U/setWebhook?url=https://davincij15tokenchecker.azurewebsites.net/api/bot
-
-    // https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=0x5d269fac3B2e0552b0F34cdc253bDB427682A4b9&address=0x94e9A5A128f7B4af0BEeFe32F411F61d244759cE&tag=latest&apikey=W9BYDVCXB8UJZ7B3YXCNFIQGQC7BYW376M
-
-    // https://etherscan.io/token/0x5d269fac3B2e0552b0F34cdc253bDB427682A4b9#balances
-
-    // https://t.me/DavinciJ15TokenBot
     [Route("api/[controller]")]
     [ApiController]
     public class BotController : ControllerBase
