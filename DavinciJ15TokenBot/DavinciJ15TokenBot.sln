@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DavinciJ15TokenBot.DataMana
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DavinciJ15TokenBot.EthereumConnector.EthNode", "..\DavinciJ15TokenBot.EthereumConnector.EthNode\DavinciJ15TokenBot.EthereumConnector.EthNode.csproj", "{EE13E2B7-7B8A-4CE7-93EC-63A506598EB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DavinciJ15TokenBot.DataManager.EF", "..\DavinciJ15TokenBot.DataManager.EF\DavinciJ15TokenBot.DataManager.EF.csproj", "{8E18BAC2-E2DF-4386-B2F9-6BBA03AEC9D6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DavinciJ15TokenBot.DataManager.EF", "..\DavinciJ15TokenBot.DataManager.EF\DavinciJ15TokenBot.DataManager.EF.csproj", "{8E18BAC2-E2DF-4386-B2F9-6BBA03AEC9D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DavinciJ15TokenBot.Purger.Console", "..\DavinciJ15TokenBot.Purger.Console\DavinciJ15TokenBot.Purger.Console.csproj", "{50235CE6-8EB6-466C-985A-CFDF09AA299E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{8E18BAC2-E2DF-4386-B2F9-6BBA03AEC9D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E18BAC2-E2DF-4386-B2F9-6BBA03AEC9D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E18BAC2-E2DF-4386-B2F9-6BBA03AEC9D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50235CE6-8EB6-466C-985A-CFDF09AA299E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50235CE6-8EB6-466C-985A-CFDF09AA299E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50235CE6-8EB6-466C-985A-CFDF09AA299E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50235CE6-8EB6-466C-985A-CFDF09AA299E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
