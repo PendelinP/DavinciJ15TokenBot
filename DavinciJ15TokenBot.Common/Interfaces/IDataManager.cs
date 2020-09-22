@@ -17,5 +17,7 @@ namespace DavinciJ15TokenBot.Common.Interfaces
         Task<Member> GetMemberByAddressAsync(string adddress);
 
         Task<IEnumerable<Member>> GetAllMembersAsync();
+
+        Task<IEnumerable<Member>> GetMembersToCheckAsync(TimeSpan holdingsTimeWindow);
     }
 }

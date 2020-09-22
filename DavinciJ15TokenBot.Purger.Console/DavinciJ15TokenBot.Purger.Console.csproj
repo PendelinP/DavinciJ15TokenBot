@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -16,9 +16,13 @@
   <ItemGroup>
     <ProjectReference Include="..\DavinciJ15TokenBot.Common\DavinciJ15TokenBot.Common.csproj" />
     <ProjectReference Include="..\DavinciJ15TokenBot.DataManager.EF\DavinciJ15TokenBot.DataManager.EF.csproj" />
+    <ProjectReference Include="..\DavinciJ15TokenBot.EthereumConnector.Etherscan\DavinciJ15TokenBot.EthereumConnector.Etherscan.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="appsettings.Development.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

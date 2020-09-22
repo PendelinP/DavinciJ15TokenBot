@@ -3,6 +3,7 @@ using DavinciJ15TokenBot.Common.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -87,6 +88,19 @@ namespace DavinciJ15TokenBot.DataManager.EF
                 var member = await context.Members.SingleOrDefaultAsync(p => p.TelegramId == telegramId);
 
                 return member;
+            }
+        }
+
+        public async Task<IEnumerable<Member>> GetMembersToCheckAsync(TimeSpan holdingsTimeWindow)
+        {
+            using (var context = this.contextFactory())
+            {
+                var dateToCheck = DateTime.UtcNow.Add(-holdingsTimeWindow);
+
+                return await context.Members
+                    .Where(m => m.MemberSinceUtc != null && 
+                    (m.LastCheckedUtc == null || m.LastCheckedUtc <= dateToCheck))
+                    .ToListAsync();
             }
         }
     }

@@ -1,10 +1,12 @@
 ﻿using DavinciJ15TokenBot.Common.Interfaces;
 using DavinciJ15TokenBot.DataManager.EF;
+using DavinciJ15TokenBot.EthereumConnector.Etherscan;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DavinciJ15TokenBot.Purger.Console
@@ -18,12 +20,15 @@ namespace DavinciJ15TokenBot.Purger.Console
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
                 .Build();
 
             var services = new ServiceCollection()
                 .AddLogging()
-                .AddSingleton<IDataManager, EntityFrameworkDataManager>();
-
+                .AddHttpClient()
+                .AddSingleton<IConfiguration>(configuration)
+                .AddSingleton<IDataManager, EntityFrameworkDataManager>()
+                .AddSingleton<IEthereumConnector, EtherscanEthereumConnector>();
 
             var dbContextOptionsBuilder = new DbContextOptionsBuilder<DataContext>();
             dbContextOptionsBuilder.UseSqlServer(configuration.GetConnectionString("DavinciJ15Database"));
@@ -40,7 +45,35 @@ namespace DavinciJ15TokenBot.Purger.Console
         private static async Task DoWork()
         {
             var dataManager = serviceProvider.GetRequiredService<IDataManager>();
-            // DO SOMETHING
+            var ethereumConnector = serviceProvider.GetRequiredService<IEthereumConnector>();
+            var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+
+            var holdingsTimeWindow = TimeSpan.FromHours(int.Parse(configuration["HoldingsTimeWindowHours"]));
+            var contractAddress = configuration["TokenContractAddress"];
+            var decimals = int.Parse(configuration["TokenDecimals"]);
+
+            var membersToCheck = await dataManager.GetMembersToCheckAsync(holdingsTimeWindow);
+
+            System.Console.WriteLine($"Members to check: {membersToCheck.Count()}");
+
+            foreach (var m in membersToCheck)
+            {
+                var tokenCount = await ethereumConnector.GetAccountBalanceAsync(m.Address, contractAddress, decimals);
+
+                if (tokenCount > 0)
+                {
+                    m.Amount = tokenCount;
+                    m.LastCheckedUtc = DateTime.UtcNow;
+
+                    await dataManager.AddOrUpdateMemberAsync(m);
+                } 
+                else
+                {
+                    // TODO kick from group
+
+                    await dataManager.DeleteMemberByTelegramIdAsync(m.TelegramId);
+                }
+            }
         }
     }
 }
