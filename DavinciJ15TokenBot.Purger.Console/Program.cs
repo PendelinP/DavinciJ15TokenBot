@@ -8,6 +8,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Telegram.Bot;
 
 namespace DavinciJ15TokenBot.Purger.Console
 {
@@ -52,6 +53,8 @@ namespace DavinciJ15TokenBot.Purger.Console
             var contractAddress = configuration["TokenContractAddress"];
             var decimals = int.Parse(configuration["TokenDecimals"]);
 
+            var client = new TelegramBotClient(configuration["TelegramBotToken"]);
+
             var membersToCheck = await dataManager.GetMembersToCheckAsync(holdingsTimeWindow);
 
             System.Console.WriteLine($"Members to check: {membersToCheck.Count()}");
@@ -69,9 +72,10 @@ namespace DavinciJ15TokenBot.Purger.Console
                 } 
                 else
                 {
-                    // TODO kick from group
+                    var chatId = configuration["ChannelChatId"];
+                    await client.KickChatMemberAsync(chatId, m.TelegramId);
 
-                    await dataManager.DeleteMemberByTelegramIdAsync(m.TelegramId);
+                    await client.SendTextMessageAsync(m.TelegramChatId, configuration["SorryForRemovalMessage"]);
                 }
             }
         }

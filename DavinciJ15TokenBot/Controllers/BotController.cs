@@ -21,6 +21,7 @@ namespace DavinciJ15TokenBot.Controllers
         private readonly IDataManager dataManager;
         private readonly TelegramBotClient client;
         private readonly long channelChatId;
+        private readonly TimeSpan holdingsTimeWindow;
 
         public BotController(IConfiguration configuration, IEthereumMessageSigner ethereumMessageSigner, IEthereumConnector ethereumConnector, IDataManager dataManager)
         {
@@ -31,6 +32,8 @@ namespace DavinciJ15TokenBot.Controllers
             this.client = new TelegramBotClient(this.configuration["TelegramBotToken"]);
 
             this.channelChatId = long.Parse(this.configuration["ChannelChatId"]);
+
+            this.holdingsTimeWindow = TimeSpan.FromHours(int.Parse(configuration["HoldingsTimeWindowHours"]));
         }
 
         [HttpGet]
@@ -56,42 +59,80 @@ namespace DavinciJ15TokenBot.Controllers
             // the user has to contact the bot via PN - see this
             https://stackoverflow.com/q/49965738/1820522
 
-            // onboard new members
+            var newlyCreatedMembers = false;
+
+            // members joining the group
             if (message.Type == Telegram.Bot.Types.Enums.MessageType.ChatMembersAdded && message.NewChatMembers != null)
             {
                 foreach (var m in message.NewChatMembers)
                 {
                     var member = await this.dataManager.GetMemberByTelegramIdAsync(m.Id);
 
-                    // if the member is new, create - otherwise update props
+                    // if the member is new, create in DB
                     if (member == null)
                     {
                         member = new Member
                         {
                             TelegramId = m.Id,
+                            MemberSinceUtc = DateTime.UtcNow
                         };
+
+                        newlyCreatedMembers = true;
+                    }
+                    // returning member (within the holdings time window it's okay- otherwise check if member has tokens and kick instantly if not)
+                    else if (member.MemberSinceUtc < DateTime.UtcNow.Subtract(this.holdingsTimeWindow))
+                    {
+                        var chatId = configuration["ChannelChatId"];
+
+                        // we know the member and his address - check balance
+                        if (member.Address != null)
+                        {
+                            var contractAddress = this.configuration["TokenContractAddress"];
+                            var tokenDecimals = int.Parse(this.configuration["TokenDecimals"]);
+
+                            var tokenCount = await this.ethereumConnector.GetAccountBalanceAsync(member.Address, contractAddress, tokenDecimals);
+
+                            if (tokenCount > 0)
+                            {
+                                member.Amount = tokenCount;
+                                member.LastCheckedUtc = DateTime.UtcNow;
+                            }
+                            else
+                            {
+                                await client.KickChatMemberAsync(chatId, member.TelegramId);
+                                await client.SendTextMessageAsync(member.TelegramChatId, configuration["SorryForRemovalMessage"]);
+                            }
+                        } 
+                        else // it's just a returning member without legitimation - kick (we can't send a message since we don't know the chat id)
+                        {
+                            await client.KickChatMemberAsync(chatId, member.TelegramId);
+                        }
                     }
 
+                    // update telegram username in all cases
                     member.Name = m.Username;
-                    member.MemberSinceUtc = DateTime.UtcNow;
 
                     await this.dataManager.AddOrUpdateMemberAsync(member);
                 }
 
-                await this.client.SendTextMessageAsync(message.Chat.Id, this.configuration["ChannelWelcomeMessage"]);
+                // only send greetings to newly created members - returners already have seen this message and spammes don't need to see it ;)
+                if (newlyCreatedMembers)
+                {
+                    await this.client.SendTextMessageAsync(message.Chat.Id, this.configuration["ChannelWelcomeMessage"]);
+                }
 
                 return this.Ok();
             }
 
-            // members leaving
-            if (message.Type == Telegram.Bot.Types.Enums.MessageType.ChatMemberLeft && message.LeftChatMember != null)
-            {
-                var leftMember = message.LeftChatMember;
+            // members leaving (not needed)
+            //if (message.Type == Telegram.Bot.Types.Enums.MessageType.ChatMemberLeft && message.LeftChatMember != null)
+            //{
+            //    var leftMember = message.LeftChatMember;
 
-                await this.dataManager.DeleteMemberByTelegramIdAsync(leftMember.Id);
+            //    await this.dataManager.DeleteMemberByTelegramIdAsync(leftMember.Id);
 
-                return this.Ok();
-            }
+            //    return this.Ok();
+            //}
 
             // react on private messages (registration process)
             if (message.Chat.Id != this.channelChatId)
@@ -105,9 +146,6 @@ namespace DavinciJ15TokenBot.Controllers
                 { 
                     try
                     {
-                        var contractAddress = this.configuration["TokenContractAddress"];
-                        var tokenDecimals = int.Parse(this.configuration["TokenDecimals"]);
-                        
                         var result = ParseIncomingBotMessage(message.Text);
 
                         var addressUsedForSigning = this.ethereumMessageSigner.GetAddressFromSignedMessage(result.Message, result.Signature);

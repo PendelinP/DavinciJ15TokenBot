@@ -95,10 +95,12 @@ namespace DavinciJ15TokenBot.DataManager.EF
         {
             using (var context = this.contextFactory())
             {
-                var dateToCheck = DateTime.UtcNow.Add(-holdingsTimeWindow);
+                var dateToCheck = DateTime.UtcNow.Subtract(holdingsTimeWindow);
 
                 return await context.Members
-                    .Where(m => m.MemberSinceUtc != null && 
+                    .Where(m => 
+                    m.MemberSinceUtc != null && 
+                    m.MemberSinceUtc <= dateToCheck &&
                     (m.LastCheckedUtc == null || m.LastCheckedUtc <= dateToCheck))
                     .ToListAsync();
             }
