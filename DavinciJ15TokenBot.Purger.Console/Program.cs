@@ -54,6 +54,7 @@ namespace DavinciJ15TokenBot.Purger.Console
             var decimals = int.Parse(configuration["TokenDecimals"]);
 
             var client = new TelegramBotClient(configuration["TelegramBotToken"]);
+            var chatId = configuration["ChannelChatId"];
 
             var membersToCheck = await dataManager.GetMembersToCheckAsync(holdingsTimeWindow);
 
@@ -61,25 +62,33 @@ namespace DavinciJ15TokenBot.Purger.Console
 
             foreach (var m in membersToCheck)
             {
-                var tokenCount = await ethereumConnector.GetAccountBalanceAsync(m.Address, contractAddress, decimals);
-
-                if (tokenCount > 0)
+                if (m.Address != null)
                 {
-                    m.Amount = tokenCount;
-                    m.LastCheckedUtc = DateTime.UtcNow;
+                    var tokenCount = await ethereumConnector.GetAccountBalanceAsync(m.Address, contractAddress, decimals);
 
-                    await dataManager.AddOrUpdateMemberAsync(m);
+                    if (tokenCount > 0)
+                    {
+                        m.Amount = tokenCount;
+                        m.LastCheckedUtc = DateTime.UtcNow;
 
-                    System.Console.WriteLine($"Updated: {m.Name}({m.TelegramId}): {m.Amount}");
-                } 
-                else
+                        await dataManager.AddOrUpdateMemberAsync(m);
+
+                        System.Console.WriteLine($"Updated: {m.Name}({m.TelegramId}): {m.Amount}");
+                    }
+                    else
+                    {
+                        await client.KickChatMemberAsync(chatId, m.TelegramId);
+
+                        System.Console.WriteLine($"Kicked: {m.Name}({m.TelegramId})");
+
+                        await client.SendTextMessageAsync(m.TelegramChatId, configuration["SorryForRemovalMessage"]);
+                    }
+                }
+                else // it's member without legitimation - kick (we can't send a message since we don't know the chat id)
                 {
-                    var chatId = configuration["ChannelChatId"];
-                    await client.KickChatMemberAsync(chatId, m.TelegramId);
-
                     System.Console.WriteLine($"Kicked: {m.Name}({m.TelegramId})");
 
-                    await client.SendTextMessageAsync(m.TelegramChatId, configuration["SorryForRemovalMessage"]);
+                    await client.KickChatMemberAsync(chatId, m.TelegramId);
                 }
             }
         }
