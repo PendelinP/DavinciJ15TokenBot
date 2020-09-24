@@ -69,11 +69,15 @@ namespace DavinciJ15TokenBot.Purger.Console
                     m.LastCheckedUtc = DateTime.UtcNow;
 
                     await dataManager.AddOrUpdateMemberAsync(m);
+
+                    System.Console.WriteLine($"Updated: {m.Name}({m.TelegramId}): {m.Amount}");
                 } 
                 else
                 {
                     var chatId = configuration["ChannelChatId"];
                     await client.KickChatMemberAsync(chatId, m.TelegramId);
+
+                    System.Console.WriteLine($"Kicked: {m.Name}({m.TelegramId})");
 
                     await client.SendTextMessageAsync(m.TelegramChatId, configuration["SorryForRemovalMessage"]);
                 }
