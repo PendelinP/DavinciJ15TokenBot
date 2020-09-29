@@ -30,6 +30,9 @@ namespace DavinciJ15TokenBot.EthereumConnector.Etherscan
             var client = this.clientFactory.CreateClient();
             var response = await client.GetStringAsync(requestUrl);
 
+            // wait for a little while since the free etherscan api allows only 5 requests per second
+            await Task.Delay(220);
+
             var responseObject = JsonConvert.DeserializeObject<AccountBalanceResult>(response);
 
             var divisor = Math.Pow(10, decimals);
