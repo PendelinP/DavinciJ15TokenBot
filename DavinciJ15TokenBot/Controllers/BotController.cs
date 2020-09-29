@@ -148,7 +148,17 @@ namespace DavinciJ15TokenBot.Controllers
                     {
                         var result = ParseIncomingBotMessage(message.Text);
 
-                        var addressUsedForSigning = this.ethereumMessageSigner.GetAddressFromSignedMessage(result.Message, result.Signature);
+                        var addressUsedForSigning = string.Empty;
+
+                        try
+                        {
+                            addressUsedForSigning = this.ethereumMessageSigner.GetAddressFromSignedMessage(result.Message, result.Signature);
+                        } 
+                        catch (Exception)
+                        {
+                            await this.client.SendTextMessageAsync(message.Chat.Id, $"The given signature seems to be invalid. Please try again.");
+                            return this.Ok();
+                        }
 
                         if (result.Address != addressUsedForSigning)
                         {
@@ -190,6 +200,10 @@ namespace DavinciJ15TokenBot.Controllers
                     catch (SignedMessageParsingError error)
                     {
                         await this.client.SendTextMessageAsync(message.Chat.Id, $"Something went wrong.\n\n{error.Message}\n\nPlease try again.");
+                    }
+                    catch (Exception)
+                    {
+                        await this.client.SendTextMessageAsync(message.Chat.Id, $"Something went wrong. Please try again.");
                     }
                 }
             } 
