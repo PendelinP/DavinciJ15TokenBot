@@ -49,7 +49,7 @@ namespace DavinciJ15TokenBot.Controllers
         public async Task<IActionResult> Post([FromBody] Update update)
         {
             // don't react of anything else than messages
-            if(update.Type != Telegram.Bot.Types.Enums.UpdateType.Message)
+            if (update.Type != Telegram.Bot.Types.Enums.UpdateType.Message)
             {
                 return this.Ok();
             }
@@ -59,92 +59,92 @@ namespace DavinciJ15TokenBot.Controllers
             // the user has to contact the bot via PN - see this
             https://stackoverflow.com/q/49965738/1820522
 
-            var newlyCreatedMembers = false;
-
-            // members joining the group
-            if (message.Type == Telegram.Bot.Types.Enums.MessageType.ChatMembersAdded && message.NewChatMembers != null)
+            try
             {
-                foreach (var m in message.NewChatMembers)
+                var newlyCreatedMembers = false;
+
+                // members joining the group
+                if (message.NewChatMembers != null)
                 {
-                    var member = await this.dataManager.GetMemberByTelegramIdAsync(m.Id);
-
-                    // if the member is new, create in DB
-                    if (member == null)
+                    foreach (var m in message.NewChatMembers)
                     {
-                        member = new Member
+                        var member = await this.dataManager.GetMemberByTelegramIdAsync(m.Id);
+
+                        // if the member is new, create in DB
+                        if (member == null)
                         {
-                            TelegramId = m.Id,
-                            MemberSinceUtc = DateTime.UtcNow
-                        };
-
-                        newlyCreatedMembers = true;
-                    }
-                    // returning member (within the holdings time window it's okay- otherwise check if member has tokens and kick instantly if not)
-                    else if (member.MemberSinceUtc < DateTime.UtcNow.Subtract(this.holdingsTimeWindow))
-                    {
-                        var chatId = configuration["ChannelChatId"];
-
-                        // we know the member and his address - check balance
-                        if (member.Address != null)
-                        {
-                            var contractAddress = this.configuration["TokenContractAddress"];
-                            var tokenDecimals = int.Parse(this.configuration["TokenDecimals"]);
-
-                            var tokenCount = await this.ethereumConnector.GetAccountBalanceAsync(member.Address, contractAddress, tokenDecimals);
-
-                            if (tokenCount > 0)
+                            member = new Member
                             {
-                                member.Amount = tokenCount;
-                                member.LastCheckedUtc = DateTime.UtcNow;
+                                TelegramId = m.Id,
+                                MemberSinceUtc = DateTime.UtcNow
+                            };
+
+                            newlyCreatedMembers = true;
+                        }
+                        // returning member (within the holdings time window it's okay- otherwise check if member has tokens and kick instantly if not)
+                        else if (member.MemberSinceUtc < DateTime.UtcNow.Subtract(this.holdingsTimeWindow))
+                        {
+                            var chatId = configuration["ChannelChatId"];
+
+                            // we know the member and his address - check balance
+                            if (member.Address != null)
+                            {
+                                var contractAddress = this.configuration["TokenContractAddress"];
+                                var tokenDecimals = int.Parse(this.configuration["TokenDecimals"]);
+
+                                var tokenCount = await this.ethereumConnector.GetAccountBalanceAsync(member.Address, contractAddress, tokenDecimals);
+
+                                if (tokenCount > 0)
+                                {
+                                    member.Amount = tokenCount;
+                                    member.LastCheckedUtc = DateTime.UtcNow;
+                                }
+                                else
+                                {
+                                    await this.client.KickChatMemberAsync(chatId, member.TelegramId);
+                                    await this.TrySendMessageAsync(member.TelegramChatId.Value, configuration["SorryForRemovalMessage"]);
+                                }
                             }
-                            else
+                            else // it's just a returning member without legitimation - kick (we can't send a message since we don't know the chat id)
                             {
                                 await client.KickChatMemberAsync(chatId, member.TelegramId);
-                                await client.SendTextMessageAsync(member.TelegramChatId, configuration["SorryForRemovalMessage"]);
                             }
-                        } 
-                        else // it's just a returning member without legitimation - kick (we can't send a message since we don't know the chat id)
-                        {
-                            await client.KickChatMemberAsync(chatId, member.TelegramId);
                         }
+
+                        // update telegram username in all cases
+                        member.Name = m.Username;
+
+                        await this.dataManager.AddOrUpdateMemberAsync(member);
                     }
 
-                    // update telegram username in all cases
-                    member.Name = m.Username;
+                    // only send greetings to newly created members - returners already have seen this message and spammes don't need to see it ;)
+                    if (newlyCreatedMembers)
+                    {
+                        await this.TrySendMessageAsync(message.Chat.Id, this.configuration["ChannelWelcomeMessage"]);
+                    }
 
-                    await this.dataManager.AddOrUpdateMemberAsync(member);
+                    return this.Ok();
                 }
 
-                // only send greetings to newly created members - returners already have seen this message and spammes don't need to see it ;)
-                if (newlyCreatedMembers)
+                // members leaving (not needed)
+                //if (message.Type == Telegram.Bot.Types.Enums.MessageType.ChatMemberLeft && message.LeftChatMember != null)
+                //{
+                //    var leftMember = message.LeftChatMember;
+
+                //    await this.dataManager.DeleteMemberByTelegramIdAsync(leftMember.Id);
+
+                //    return this.Ok();
+                //}
+
+                // react on private messages (registration process)
+                if (message.Chat.Id != this.channelChatId)
                 {
-                    await this.client.SendTextMessageAsync(message.Chat.Id, this.configuration["ChannelWelcomeMessage"]);
-                }
-
-                return this.Ok();
-            }
-
-            // members leaving (not needed)
-            //if (message.Type == Telegram.Bot.Types.Enums.MessageType.ChatMemberLeft && message.LeftChatMember != null)
-            //{
-            //    var leftMember = message.LeftChatMember;
-
-            //    await this.dataManager.DeleteMemberByTelegramIdAsync(leftMember.Id);
-
-            //    return this.Ok();
-            //}
-
-            // react on private messages (registration process)
-            if (message.Chat.Id != this.channelChatId)
-            {
-                // no signed message - show personal welcome message with registration guide
-                if (!this.SeemsToBeASignedMessage(message.Text))
-                {
-                    await this.client.SendTextMessageAsync(message.Chat.Id, this.configuration["BotWelcomeMessage"]);
-                }
-                else // message contains address and signature information - try to complete registration
-                { 
-                    try
+                    // no signed message - show personal welcome message with registration guide
+                    if (message.Text == null || !this.SeemsToBeASignedMessage(message.Text))
+                    {
+                        await this.TrySendMessageAsync(message.Chat.Id, this.configuration["BotWelcomeMessage"]);
+                    }
+                    else // message contains address and signature information - try to complete registration
                     {
                         var result = ParseIncomingBotMessage(message.Text);
 
@@ -153,16 +153,16 @@ namespace DavinciJ15TokenBot.Controllers
                         try
                         {
                             addressUsedForSigning = this.ethereumMessageSigner.GetAddressFromSignedMessage(result.Message, result.Signature);
-                        } 
+                        }
                         catch (Exception)
                         {
-                            await this.client.SendTextMessageAsync(message.Chat.Id, $"The given signature seems to be invalid. Please try again.");
+                            await this.TrySendMessageAsync(message.Chat.Id, $"The given signature seems to be invalid. Please try again.");
                             return this.Ok();
                         }
 
                         if (result.Address != addressUsedForSigning)
                         {
-                            await this.client.SendTextMessageAsync(message.Chat.Id, $"The given address does not match with your signature address (you signed with {addressUsedForSigning}). Please try again.");
+                            await this.TrySendMessageAsync(message.Chat.Id, $"The given address does not match with your signature address (you signed with {addressUsedForSigning}). Please try again.");
                             return this.Ok();
                         }
 
@@ -171,7 +171,7 @@ namespace DavinciJ15TokenBot.Controllers
                         // check if address is already registered
                         if (memberWithAddress != null && memberWithAddress.TelegramId != message.From.Id)
                         {
-                            await this.client.SendTextMessageAsync(message.Chat.Id, $"Nice try but this address is already registered ;)");
+                            await this.TrySendMessageAsync(message.Chat.Id, $"Nice try but this address is already registered ;)");
                             return this.Ok();
                         }
 
@@ -195,20 +195,33 @@ namespace DavinciJ15TokenBot.Controllers
 
                         // var balance = await this.ethereumConnector.GetAccountBalanceAsync(result.Address, contractAddress, tokenDecimals);
 
-                        await this.client.SendTextMessageAsync(message.Chat.Id, this.configuration["RegistrationSuccessfulMessage"]);
-                    } 
-                    catch (SignedMessageParsingError error)
-                    {
-                        await this.client.SendTextMessageAsync(message.Chat.Id, $"Something went wrong.\n\n{error.Message}\n\nPlease try again.");
-                    }
-                    catch (Exception)
-                    {
-                        await this.client.SendTextMessageAsync(message.Chat.Id, $"Something went wrong. Please try again.");
+                        await this.TrySendMessageAsync(message.Chat.Id, this.configuration["RegistrationSuccessfulMessage"]);
+
                     }
                 }
-            } 
+            }
+            catch (SignedMessageParsingError error)
+            {
+                await this.TrySendMessageAsync(message.Chat.Id, $"Something went wrong.\n\n{error.Message}\n\nPlease try again.");
+            }
+            catch (Exception)
+            {
+                await this.TrySendMessageAsync(message.Chat.Id, $"Something went wrong. Please try again.");
+            }
 
             return this.Ok();
+        }
+
+        private async Task TrySendMessageAsync(long chatId, string message)
+        {
+            try
+            {
+                await this.client.SendTextMessageAsync(chatId, message);
+            } 
+            catch (Exception ex)
+            {
+                Console.WriteLine("Unable to deliver message:" + ex.Message);
+            }
         }
 
         private bool SeemsToBeASignedMessage(string message)
