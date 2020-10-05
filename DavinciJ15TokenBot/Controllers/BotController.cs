@@ -76,7 +76,6 @@ namespace DavinciJ15TokenBot.Controllers
                             member = new Member
                             {
                                 TelegramId = m.Id,
-                                MemberSinceUtc = DateTime.UtcNow
                             };
 
                             newlyCreatedMembers = true;
@@ -113,6 +112,7 @@ namespace DavinciJ15TokenBot.Controllers
 
                         // update telegram username in all cases
                         member.Name = m.Username;
+                        member.MemberSinceUtc = DateTime.UtcNow;
 
                         await this.dataManager.AddOrUpdateMemberAsync(member);
                     }
