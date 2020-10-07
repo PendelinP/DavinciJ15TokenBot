@@ -22,6 +22,7 @@ namespace DavinciJ15TokenBot.Controllers
         private readonly TelegramBotClient client;
         private readonly long channelChatId;
         private readonly TimeSpan holdingsTimeWindow;
+        private readonly decimal minTokenCount;
 
         public BotController(IConfiguration configuration, IEthereumMessageSigner ethereumMessageSigner, IEthereumConnector ethereumConnector, IDataManager dataManager)
         {
@@ -32,6 +33,8 @@ namespace DavinciJ15TokenBot.Controllers
             this.client = new TelegramBotClient(this.configuration["TelegramBotToken"]);
 
             this.channelChatId = long.Parse(this.configuration["ChannelChatId"]);
+
+            this.minTokenCount = decimal.Parse(this.configuration["MinTokenCount"]);
 
             this.holdingsTimeWindow = TimeSpan.FromHours(int.Parse(configuration["HoldingsTimeWindowHours"]));
         }
@@ -93,7 +96,7 @@ namespace DavinciJ15TokenBot.Controllers
 
                                 var tokenCount = await this.ethereumConnector.GetAccountBalanceAsync(member.Address, contractAddress, tokenDecimals);
 
-                                if (tokenCount > 0)
+                                if (tokenCount > this.minTokenCount)
                                 {
                                     member.Amount = tokenCount;
                                     member.LastCheckedUtc = DateTime.UtcNow;

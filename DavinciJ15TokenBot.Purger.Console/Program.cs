@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,6 +19,11 @@ namespace DavinciJ15TokenBot.Purger.Console
 
         static async Task Main(string[] args)
         {
+            var cultureInfo = new CultureInfo("en-US");
+
+            CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+            CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -53,6 +59,8 @@ namespace DavinciJ15TokenBot.Purger.Console
             var contractAddress = configuration["TokenContractAddress"];
             var decimals = int.Parse(configuration["TokenDecimals"]);
 
+            var minTokenCount = decimal.Parse(configuration["MinTokenCount"]);
+
             var client = new TelegramBotClient(configuration["TelegramBotToken"]);
             var chatId = configuration["ChannelChatId"];
 
@@ -66,7 +74,7 @@ namespace DavinciJ15TokenBot.Purger.Console
                 {
                     var tokenCount = await ethereumConnector.GetAccountBalanceAsync(m.Address, contractAddress, decimals);
 
-                    if (tokenCount > 0)
+                    if (tokenCount > minTokenCount)
                     {
                         m.Amount = tokenCount;
                         m.LastCheckedUtc = DateTime.UtcNow;
