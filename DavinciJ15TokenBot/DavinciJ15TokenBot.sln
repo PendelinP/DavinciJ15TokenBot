@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DavinciJ15TokenBot.DataMana
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DavinciJ15TokenBot.Purger.Console", "..\DavinciJ15TokenBot.Purger.Console\DavinciJ15TokenBot.Purger.Console.csproj", "{50235CE6-8EB6-466C-985A-CFDF09AA299E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DavinciJ15TokenBot.DataManager.PostgreSQL", "..\DavinciJ15TokenBot.DataManager.PostgreSQL\DavinciJ15TokenBot.DataManager.PostgreSQL.csproj", "{A71AB877-3574-410F-887F-F04C9F948B6F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,6 +76,12 @@ Global
 		{50235CE6-8EB6-466C-985A-CFDF09AA299E}.DockerRelease|Any CPU.Build.0 = DockerRelease|Any CPU
 		{50235CE6-8EB6-466C-985A-CFDF09AA299E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50235CE6-8EB6-466C-985A-CFDF09AA299E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A71AB877-3574-410F-887F-F04C9F948B6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A71AB877-3574-410F-887F-F04C9F948B6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A71AB877-3574-410F-887F-F04C9F948B6F}.DockerRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{A71AB877-3574-410F-887F-F04C9F948B6F}.DockerRelease|Any CPU.Build.0 = Release|Any CPU
+		{A71AB877-3574-410F-887F-F04C9F948B6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A71AB877-3574-410F-887F-F04C9F948B6F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

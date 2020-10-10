@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DavinciJ15TokenBot.Common.Configuration;
 using DavinciJ15TokenBot.Common.Interfaces;
-using DavinciJ15TokenBot.DataManager.EF;
 using DavinciJ15TokenBot.EthereumConnector.Etherscan;
 using DavinciJ15TokenBot.EthereumConnector.EthNode;
 using DavinciJ15TokenBot.MessageSigner.Nethereum;
@@ -39,15 +38,27 @@ namespace DavinciJ15TokenBot
 
             services.AddHttpClient();
 
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<DataContext>();
-            dbContextOptionsBuilder.UseSqlServer(this.Configuration.GetConnectionString("DavinciJ15Database"));
+#if !DockerRelease
+            var dbContextOptionsBuilder = new DbContextOptionsBuilder<DataManager.EF.DataContext>();
+            dbContextOptionsBuilder.UseNpgsql(this.Configuration.GetConnectionString("DavinciJ15Database"));
 
-            var contextFactory = new Func<DataContext>(() => new DataContext(dbContextOptionsBuilder.Options));
+            var contextFactory = new Func<DataManager.EF.DataContext>(() => new DataManager.EF.DataContext(dbContextOptionsBuilder.Options));
 
             services.AddSingleton(s => contextFactory);
 
             services.AddScoped<IEthereumMessageSigner, NethereumMessageSigner>();
-            services.AddScoped<IDataManager, EntityFrameworkDataManager>();
+            services.AddScoped<IDataManager, DataManager.EF.EntityFrameworkDataManager>();
+#else
+            var dbContextOptionsBuilder = new DbContextOptionsBuilder<DataManager.PostgreSQL.PGDataContext>();
+            dbContextOptionsBuilder.UseNpgsql(this.Configuration.GetConnectionString("DavinciJ15Database"));
+
+            var contextFactory = new Func<DataManager.PostgreSQL.PGDataContext>(() => new DataManager.PostgreSQL.PGDataContext(dbContextOptionsBuilder.Options));
+
+            services.AddSingleton(s => contextFactory);
+
+            services.AddScoped<IEthereumMessageSigner, NethereumMessageSigner>();
+            services.AddScoped<IDataManager, DataManager.PostgreSQL.PostgreSQLDataManager>();
+#endif
 
             var connectorConfiguration = this.Configuration.GetSection("ConnectorConfig");
             services.Configure<ConnectorConfiguration>(connectorConfiguration);
@@ -80,6 +91,11 @@ namespace DavinciJ15TokenBot
                 app.UseHttpsRedirection();
 #endif
             }
+
+#if DockerRelease
+            var dbContext = app.ApplicationServices.GetRequiredService<Func<DataManager.PostgreSQL.PGDataContext>>();
+            dbContext().Database.EnsureCreated();
+#endif
 
             app.UseRouting();
 

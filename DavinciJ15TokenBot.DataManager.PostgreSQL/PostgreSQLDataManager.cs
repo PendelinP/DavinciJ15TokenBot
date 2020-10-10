@@ -4,16 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace DavinciJ15TokenBot.DataManager.EF
+namespace DavinciJ15TokenBot.DataManager.PostgreSQL
 {
-    public class EntityFrameworkDataManager : IDataManager
+    public class PostgreSQLDataManager : IDataManager
     {
-        private readonly Func<DataContext> contextFactory;
+        private readonly Func<PGDataContext> contextFactory;
 
-        public EntityFrameworkDataManager(Func<DataContext> contextFactory)
+        public PostgreSQLDataManager(Func<PGDataContext> contextFactory)
         {
             this.contextFactory = contextFactory ?? throw new ArgumentNullException(nameof(contextFactory));
         }
@@ -97,8 +96,8 @@ namespace DavinciJ15TokenBot.DataManager.EF
                 var dateToCheck = DateTime.UtcNow.Subtract(holdingsTimeWindow);
 
                 return await context.Members
-                    .Where(m => 
-                    m.MemberSinceUtc != null && 
+                    .Where(m =>
+                    m.MemberSinceUtc != null &&
                     m.MemberSinceUtc <= dateToCheck &&
                     (m.LastCheckedUtc == null || m.LastCheckedUtc <= dateToCheck))
                     .ToListAsync();

@@ -33,5 +33,10 @@ namespace DavinciJ15TokenBot.DataManager.LiteDB
         {
             throw new NotImplementedException();
         }
+
+        public Task<IEnumerable<Member>> GetMembersToCheckAsync(TimeSpan holdingsTimeWindow)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
