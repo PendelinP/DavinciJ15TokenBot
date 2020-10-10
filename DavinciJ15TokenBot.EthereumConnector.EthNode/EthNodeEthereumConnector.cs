@@ -1,4 +1,6 @@
-﻿using DavinciJ15TokenBot.Common.Interfaces;
+﻿using DavinciJ15TokenBot.Common.Configuration;
+using DavinciJ15TokenBot.Common.Interfaces;
+using Microsoft.Extensions.Options;
 using Nethereum.Web3;
 using System;
 using System.Collections.Generic;
@@ -15,10 +17,13 @@ namespace DavinciJ15TokenBot.EthereumConnector.EthNode
         private readonly string nodeAddress;
         private readonly AuthenticationHeaderValue authenticationHeader;
 
-        public EthNodeEthereumConnector(string nodeAddress, AuthenticationHeaderValue authenticationHeader)
+        public EthNodeEthereumConnector(IOptions<ConnectorConfiguration> options)
         {
-            this.nodeAddress = nodeAddress;
-            this.authenticationHeader = authenticationHeader;
+            this.nodeAddress = options?.Value.NodeAddress ?? throw new ArgumentNullException(nameof(options));
+            this.authenticationHeader = new AuthenticationHeaderValue(
+                "Basic", Convert.ToBase64String(
+                    ASCIIEncoding.ASCII.GetBytes(
+                       $"{options.Value.Username}:{options.Value.Password}")));
         }
 
         public async Task<decimal> GetAccountBalanceAsync(string address, string contractAddress, int decimals)

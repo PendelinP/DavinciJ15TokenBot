@@ -18,6 +18,7 @@
     <ProjectReference Include="..\DavinciJ15TokenBot.Common\DavinciJ15TokenBot.Common.csproj" />
     <ProjectReference Include="..\DavinciJ15TokenBot.DataManager.EF\DavinciJ15TokenBot.DataManager.EF.csproj" />
     <ProjectReference Include="..\DavinciJ15TokenBot.EthereumConnector.Etherscan\DavinciJ15TokenBot.EthereumConnector.Etherscan.csproj" />
+    <ProjectReference Include="..\DavinciJ15TokenBot.EthereumConnector.EthNode\DavinciJ15TokenBot.EthereumConnector.EthNode.csproj" />
     <ProjectReference Include="..\DavinciJ15TokenBot.MessageSigner.Nethereum\DavinciJ15TokenBot.MessageSigner.Nethereum.csproj" />
   </ItemGroup>
 
