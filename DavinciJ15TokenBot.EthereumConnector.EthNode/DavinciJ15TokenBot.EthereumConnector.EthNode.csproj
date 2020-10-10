@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Nethereum.Web3" Version="3.8.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DavinciJ15TokenBot.Common\DavinciJ15TokenBot.Common.csproj" />
   </ItemGroup>
 
