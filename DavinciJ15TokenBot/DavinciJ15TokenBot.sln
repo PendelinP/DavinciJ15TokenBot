@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DavinciJ15TokenBot.Ethereum
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DavinciJ15TokenBot.MessageSigner.Nethereum", "..\DavinciJ15TokenBot.MessageSigner.Nethereum\DavinciJ15TokenBot.MessageSigner.Nethereum.csproj", "{C37B1FBC-5312-447F-9E10-CC9402843919}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DavinciJ15TokenBot.DataManager.LiteDB", "..\DavinciJ15TokenBot.DataManager.LiteDB\DavinciJ15TokenBot.DataManager.LiteDB.csproj", "{44D687A4-F818-46BB-BA23-61ABF7A2C2BD}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DavinciJ15TokenBot.EthereumConnector.EthNode", "..\DavinciJ15TokenBot.EthereumConnector.EthNode\DavinciJ15TokenBot.EthereumConnector.EthNode.csproj", "{EE13E2B7-7B8A-4CE7-93EC-63A506598EB9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DavinciJ15TokenBot.DataManager.EF", "..\DavinciJ15TokenBot.DataManager.EF\DavinciJ15TokenBot.DataManager.EF.csproj", "{8E18BAC2-E2DF-4386-B2F9-6BBA03AEC9D6}"
@@ -52,12 +50,6 @@ Global
 		{C37B1FBC-5312-447F-9E10-CC9402843919}.DockerRelease|Any CPU.Build.0 = DockerRelease|Any CPU
 		{C37B1FBC-5312-447F-9E10-CC9402843919}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C37B1FBC-5312-447F-9E10-CC9402843919}.Release|Any CPU.Build.0 = Release|Any CPU
-		{44D687A4-F818-46BB-BA23-61ABF7A2C2BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{44D687A4-F818-46BB-BA23-61ABF7A2C2BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{44D687A4-F818-46BB-BA23-61ABF7A2C2BD}.DockerRelease|Any CPU.ActiveCfg = DockerRelease|Any CPU
-		{44D687A4-F818-46BB-BA23-61ABF7A2C2BD}.DockerRelease|Any CPU.Build.0 = DockerRelease|Any CPU
-		{44D687A4-F818-46BB-BA23-61ABF7A2C2BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{44D687A4-F818-46BB-BA23-61ABF7A2C2BD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EE13E2B7-7B8A-4CE7-93EC-63A506598EB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EE13E2B7-7B8A-4CE7-93EC-63A506598EB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE13E2B7-7B8A-4CE7-93EC-63A506598EB9}.DockerRelease|Any CPU.ActiveCfg = DockerRelease|Any CPU
