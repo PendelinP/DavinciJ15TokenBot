@@ -14,8 +14,6 @@ namespace DavinciJ15TokenBot.EthereumConnector.Etherscan
     {
         private readonly IConfiguration configuration;
         private readonly IHttpClientFactory clientFactory;
-        private readonly string etherscanApiKey;
-        private readonly Func<HttpClient> clientFactory2;
 
         public EtherscanEthereumConnector(IConfiguration configuration, IHttpClientFactory clientFactory)
         {
@@ -23,19 +21,13 @@ namespace DavinciJ15TokenBot.EthereumConnector.Etherscan
             this.clientFactory = clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));
         }
 
-        public EtherscanEthereumConnector(string etherscanApiKey, Func<HttpClient> clientFactory2)
-        {
-            this.etherscanApiKey = etherscanApiKey;
-            this.clientFactory2 = clientFactory2;
-        }
-
         public async Task<decimal> GetAccountBalanceAsync(string address, string contractAddress, int decimals)
         {
-            var etherscanApiKey = this.etherscanApiKey;
+            var etherscanApiKey = this.configuration["EtherscanApiKey"];
 
             var requestUrl = $"https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress={contractAddress}&address={address}&tag=latest&apikey={etherscanApiKey}";
 
-            var client = this.clientFactory2();
+            var client = this.clientFactory.CreateClient();
             var response = await client.GetStringAsync(requestUrl);
 
             // wait for a little while since the free etherscan api allows only 5 requests per second
