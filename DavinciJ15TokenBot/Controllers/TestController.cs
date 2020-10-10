@@ -19,7 +19,7 @@ namespace DavinciJ15TokenBot.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Test([FromRoute] string address)
+        public async Task<IActionResult> Test([FromQuery] string address)
         {
             var contractAddress = this.configuration["TokenContractAddress"];
             var tokenDecimals = int.Parse(this.configuration["TokenDecimals"]);

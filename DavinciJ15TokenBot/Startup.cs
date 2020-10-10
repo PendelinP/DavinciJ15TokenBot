@@ -76,7 +76,9 @@ namespace DavinciJ15TokenBot
             }
             else
             {
+#if !DockerRelease
                 app.UseHttpsRedirection();
+#endif
             }
 
             app.UseRouting();
