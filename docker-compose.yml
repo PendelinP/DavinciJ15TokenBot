@@ -1,0 +1,26 @@
+version: "2"
+services:
+  bot:
+    build: .
+    container_name: dj15_bot
+    restart: always
+    ports:
+      - 80:80
+    environment:
+      ConnectionStrings__DavinciJ15Database: "User ID=postgres;Password=supers3cretPassw0rd;Host=dj15_db;Port=5432;Database=postgres;Pooling=true;"
+      ConnectorConfig__Mode: Node
+      ConnectorConfig__NodeAddress: "http://es001.dcs1.cc:8545"
+      ConnectorConfig__Username: "WinterFire"
+      ConnectorConfig__Password: "GtmsQnr6SygaMi5TtpRvrY9uqv2ZCLSKg9UhbzNT8BwT"
+  postgres:
+    container_name: dj15_db
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: supers3cretPassw0rd
+      PGDATA: /data/postgres
+    volumes:
+       - postgres:/data/postgres
+    restart: unless-stopped
+volumes:
+    postgres:
