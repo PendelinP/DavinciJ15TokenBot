@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -96,7 +97,7 @@ namespace DavinciJ15TokenBot.Controllers
 
                                 var tokenCount = await this.ethereumConnector.GetAccountBalanceAsync(member.Address, contractAddress, tokenDecimals);
 
-                                if (tokenCount > this.minTokenCount)
+                                if (tokenCount >= this.minTokenCount)
                                 {
                                     member.Amount = tokenCount;
                                     member.LastCheckedUtc = DateTime.UtcNow;
@@ -237,6 +238,18 @@ namespace DavinciJ15TokenBot.Controllers
         private BotMessageToCheck ParseIncomingBotMessage(string message)
         {
             message = message.Trim();
+            message = message.Replace("„", "\"");
+            message = message.Replace("“", "\"");
+
+            var quotesCount = message.Count(p => p == '"');
+            if (quotesCount < 2)
+            {
+                throw new SignedMessageParsingError($"The given message seems to be incorrect - the quote signs (\") are missing. Please note that the message to sign has to be stated within \" symbols (e.g. {this.configuration["SampleMessageValidationError"]}).");
+            }
+            else if (quotesCount > 2)
+            {
+                throw new SignedMessageParsingError($"The given message seems to be incorrect - you used too many quote signs (\"). Please note that the message to sign has to be stated within \" symbols (e.g. {this.configuration["SampleMessageValidationError"]}). Nothing more ;)");
+            }
 
             var messagePartEnd = message.IndexOf("\"", 1);
 

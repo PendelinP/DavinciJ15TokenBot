@@ -74,7 +74,7 @@ namespace DavinciJ15TokenBot.Purger.Console
                 {
                     var tokenCount = await ethereumConnector.GetAccountBalanceAsync(m.Address, contractAddress, decimals);
 
-                    if (tokenCount > minTokenCount)
+                    if (tokenCount >= minTokenCount)
                     {
                         m.Amount = tokenCount;
                         m.LastCheckedUtc = DateTime.UtcNow;
