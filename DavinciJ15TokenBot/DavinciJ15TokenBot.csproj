@@ -2,8 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Configurations>Debug;Release;DockerRelease</Configurations>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DockerRelease|AnyCPU'">
+    <DefineConstants>TRACE;DockerRelease</DefineConstants>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.8" />
@@ -17,7 +22,9 @@
   <ItemGroup>
     <ProjectReference Include="..\DavinciJ15TokenBot.Common\DavinciJ15TokenBot.Common.csproj" />
     <ProjectReference Include="..\DavinciJ15TokenBot.DataManager.EF\DavinciJ15TokenBot.DataManager.EF.csproj" />
+    <ProjectReference Include="..\DavinciJ15TokenBot.DataManager.PostgreSQL\DavinciJ15TokenBot.DataManager.PostgreSQL.csproj" />
     <ProjectReference Include="..\DavinciJ15TokenBot.EthereumConnector.Etherscan\DavinciJ15TokenBot.EthereumConnector.Etherscan.csproj" />
+    <ProjectReference Include="..\DavinciJ15TokenBot.EthereumConnector.EthNode\DavinciJ15TokenBot.EthereumConnector.EthNode.csproj" />
     <ProjectReference Include="..\DavinciJ15TokenBot.MessageSigner.Nethereum\DavinciJ15TokenBot.MessageSigner.Nethereum.csproj" />
   </ItemGroup>
 
