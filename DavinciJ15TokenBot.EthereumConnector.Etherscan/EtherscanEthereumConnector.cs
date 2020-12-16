@@ -30,8 +30,8 @@ namespace DavinciJ15TokenBot.EthereumConnector.Etherscan
             var client = this.clientFactory.CreateClient();
             var response = await client.GetStringAsync(requestUrl);
 
-            // wait for a little while since the free etherscan api allows only 5 requests per second
-            await Task.Delay(220);
+            // wait for a little while since the free etherscan api has a rate limit
+            await Task.Delay(300);
 
             var responseObject = JsonConvert.DeserializeObject<AccountBalanceResult>(response);
 
