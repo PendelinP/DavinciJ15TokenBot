@@ -76,6 +76,10 @@ namespace DavinciJ15TokenBot.Purger.Console
 
                     if (tokenCount >= minTokenCount)
                     {
+                        // update the username to enable querying
+                        var info = await client.GetChatMemberAsync(chatId, m.TelegramId);
+                        m.Name = info.User.Username;
+
                         m.Amount = tokenCount;
                         m.LastCheckedUtc = DateTime.UtcNow;
 
