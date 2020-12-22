@@ -91,6 +91,9 @@ namespace DavinciJ15TokenBot.Purger.Console
                         }
                         else
                         {
+                            m.Amount = tokenCount;
+                            m.LastCheckedUtc = DateTime.UtcNow;
+
                             m.KickedAtUtc = DateTime.UtcNow;
                             await dataManager.AddOrUpdateMemberAsync(m);
 
