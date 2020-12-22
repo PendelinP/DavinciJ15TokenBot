@@ -95,7 +95,7 @@ namespace DavinciJ15TokenBot.Purger.Console
 
                             System.Console.WriteLine($"Kicked: {m.Name}({m.TelegramId})");
 
-                            await client.SendTextMessageAsync(m.TelegramChatId, configuration["SorryForRemovalMessage"]);
+                            await client.SendTextMessageAsync(m.TelegramChatId, string.Format(configuration["SorryForRemovalMessage"], minTokenCount, tokenCount));
                         }
                     }
                     else // it's member without legitimation - kick (we can't send a message since we don't know the chat id)
