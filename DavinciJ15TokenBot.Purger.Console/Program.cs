@@ -91,6 +91,9 @@ namespace DavinciJ15TokenBot.Purger.Console
                         }
                         else
                         {
+                            m.KickedAtUtc = DateTime.UtcNow;
+                            await dataManager.AddOrUpdateMemberAsync(m);
+
                             await client.KickChatMemberAsync(chatId, m.TelegramId);
 
                             System.Console.WriteLine($"Kicked: {m.Name}({m.TelegramId})");
@@ -100,6 +103,9 @@ namespace DavinciJ15TokenBot.Purger.Console
                     }
                     else // it's member without legitimation - kick (we can't send a message since we don't know the chat id)
                     {
+                        m.KickedAtUtc = DateTime.UtcNow;
+                        await dataManager.AddOrUpdateMemberAsync(m);
+
                         System.Console.WriteLine($"Kicked: {m.Name}({m.TelegramId})");
 
                         await client.KickChatMemberAsync(chatId, m.TelegramId);

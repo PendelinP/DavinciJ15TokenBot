@@ -23,5 +23,7 @@ namespace DavinciJ15TokenBot.Common.Models
         public DateTime? RegistrationValidSinceUtc { get; set; }
 
         public long? TelegramChatId { get; set; }
+
+        public DateTime? KickedAtUtc { get; set; }
     }
 }

@@ -101,7 +101,8 @@ namespace DavinciJ15TokenBot.DataManager.EF
                     .Where(m => 
                     m.MemberSinceUtc != null && 
                     m.MemberSinceUtc <= dateToCheck &&
-                    (m.LastCheckedUtc == null || m.LastCheckedUtc <= dateToCheck))
+                    (m.LastCheckedUtc == null || m.LastCheckedUtc <= dateToCheck) &&
+                    m.KickedAtUtc == null)
                     .ToListAsync();
             }
         }

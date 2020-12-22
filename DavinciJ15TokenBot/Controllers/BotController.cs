@@ -104,12 +104,14 @@ namespace DavinciJ15TokenBot.Controllers
                                 }
                                 else
                                 {
+                                    member.KickedAtUtc = DateTime.UtcNow;
                                     await this.client.KickChatMemberAsync(chatId, member.TelegramId);
                                     await this.TrySendMessageAsync(member.TelegramChatId.Value, configuration["SorryForRemovalMessage"]);
                                 }
                             }
                             else // it's just a returning member without legitimation - kick (we can't send a message since we don't know the chat id)
                             {
+                                member.KickedAtUtc = DateTime.UtcNow;
                                 await client.KickChatMemberAsync(chatId, member.TelegramId);
                             }
                         }
@@ -129,16 +131,6 @@ namespace DavinciJ15TokenBot.Controllers
 
                     return this.Ok();
                 }
-
-                // members leaving (not needed)
-                //if (message.Type == Telegram.Bot.Types.Enums.MessageType.ChatMemberLeft && message.LeftChatMember != null)
-                //{
-                //    var leftMember = message.LeftChatMember;
-
-                //    await this.dataManager.DeleteMemberByTelegramIdAsync(leftMember.Id);
-
-                //    return this.Ok();
-                //}
 
                 // react on private messages (registration process)
                 if (message.Chat.Id != this.channelChatId)
@@ -194,6 +186,9 @@ namespace DavinciJ15TokenBot.Controllers
                         member.RegistrationValidSinceUtc = DateTime.UtcNow;
                         member.TelegramChatId = message.Chat.Id;
                         member.Address = result.Address;
+
+                        // reset kicked timestamp to include this member in the purger job
+                        member.KickedAtUtc = null;
 
                         await this.dataManager.AddOrUpdateMemberAsync(member);
 
