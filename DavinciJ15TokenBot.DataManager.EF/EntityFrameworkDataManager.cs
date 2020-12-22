@@ -42,6 +42,7 @@ namespace DavinciJ15TokenBot.DataManager.EF
                     existingMember.Address = member.Address;
                     existingMember.MemberSinceUtc = member.MemberSinceUtc;
                     existingMember.TelegramChatId = member.TelegramChatId;
+                    existingMember.KickedAtUtc = member.KickedAtUtc;
                 }
 
                 await context.SaveChangesAsync();
