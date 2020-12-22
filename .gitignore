@@ -354,3 +354,5 @@ appsettings.Development.json
 
 # Misc
 notes.txt
+/DavinciJ15TokenBot/Properties/ServiceDependencies/davincij15tokenchecker-staging - Web Deploy/profile.arm.json
+/DavinciJ15TokenBot.Purger.Console/Properties/ServiceDependencies/DavinciJ15TokenChecker - Web Deploy/profile.arm.json
