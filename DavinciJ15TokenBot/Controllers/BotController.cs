@@ -106,7 +106,7 @@ namespace DavinciJ15TokenBot.Controllers
                                 {
                                     member.KickedAtUtc = DateTime.UtcNow;
                                     await this.client.KickChatMemberAsync(chatId, member.TelegramId);
-                                    await this.TrySendMessageAsync(member.TelegramChatId.Value, configuration["SorryForRemovalMessage"]);
+                                    await this.TrySendMessageAsync(member.TelegramChatId.Value, string.Format(configuration["SorryForRemovalMessage"], minTokenCount, tokenCount));
                                 }
                             }
                             else // it's just a returning member without legitimation - kick (we can't send a message since we don't know the chat id)
@@ -135,6 +135,22 @@ namespace DavinciJ15TokenBot.Controllers
                 // react on private messages (registration process)
                 if (message.Chat.Id != this.channelChatId)
                 {
+                    if(message.Text != null && message.Text == "link")
+                    {
+                        var link = await client.ExportChatInviteLinkAsync(this.channelChatId);
+
+                        await this.TrySendMessageAsync(message.Chat.Id, link);
+
+                        return this.Ok();
+                    }
+
+                    if (message.Text != null && message.Text == "invitemessage")
+                    {
+                        await this.TrySendMessageAsync(message.Chat.Id, this.configuration["RegistrationSuccessfulMessage"]);
+
+                        return this.Ok();
+                    }
+
                     // no signed message - show personal welcome message with registration guide
                     if (message.Text == null || !this.SeemsToBeASignedMessage(message.Text))
                     {
