@@ -1,11 +1,13 @@
 ﻿using DavinciJ15TokenBot.Common;
 using DavinciJ15TokenBot.Common.Interfaces;
 using DavinciJ15TokenBot.Common.Models;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -22,6 +24,7 @@ namespace DavinciJ15TokenBot.Controllers
         private readonly IEthereumConnector ethereumConnector;
         private readonly IDataManager dataManager;
         private readonly IMemoryCache memoryCache;
+        private readonly TelemetryClient telemetryClient;
         private readonly TelegramBotClient client;
         private readonly long channelChatId;
         private readonly TimeSpan holdingsTimeWindow;
@@ -29,14 +32,14 @@ namespace DavinciJ15TokenBot.Controllers
 
         private static string InviteLinkCacheKey = "InviteLink";
 
-        public BotController(IConfiguration configuration, IEthereumMessageSigner ethereumMessageSigner, IEthereumConnector ethereumConnector, IDataManager dataManager, IMemoryCache memoryCache)
+        public BotController(IConfiguration configuration, IEthereumMessageSigner ethereumMessageSigner, IEthereumConnector ethereumConnector, IDataManager dataManager, IMemoryCache memoryCache, TelemetryClient telemetryClient)
         {
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             this.ethereumMessageSigner = ethereumMessageSigner ?? throw new ArgumentNullException(nameof(ethereumMessageSigner));
             this.ethereumConnector = ethereumConnector ?? throw new ArgumentNullException(nameof(ethereumConnector));
             this.dataManager = dataManager ?? throw new ArgumentNullException(nameof(dataManager));
             this.memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-
+            this.telemetryClient = telemetryClient ?? throw new ArgumentNullException(nameof(telemetryClient));
             this.client = new TelegramBotClient(this.configuration["TelegramBotToken"]);
 
             this.channelChatId = long.Parse(this.configuration["ChannelChatId"]);
@@ -232,6 +235,15 @@ namespace DavinciJ15TokenBot.Controllers
             {
                 await this.TrySendMessageAsync(message.Chat.Id, $"Something went wrong. Please try again.");
             }
+            finally
+            {
+                var telemetryData = new Dictionary<string, string> {
+                    { "chat id", message.Chat.Id.ToString() },
+                    { "message", message.Text }
+                };
+
+                this.telemetryClient.TrackEvent("incoming bot message", telemetryData);
+            }
 
             return this.Ok();
         }
@@ -241,6 +253,13 @@ namespace DavinciJ15TokenBot.Controllers
             try
             {
                 await this.client.SendTextMessageAsync(chatId, message);
+
+                var telemetryData = new Dictionary<string, string> {
+                    {"chatId", chatId.ToString() },
+                    {"message", message }
+                };
+
+                this.telemetryClient.TrackEvent("bot message", telemetryData);
             } 
             catch (Exception ex)
             {
@@ -324,6 +343,12 @@ namespace DavinciJ15TokenBot.Controllers
 
                 // Save data in cache.
                 this.memoryCache.Set(InviteLinkCacheKey, inviteLink, cacheEntryOptions);
+
+                var telemetryData = new Dictionary<string, string> {
+                    {"invite link", inviteLink }
+                };
+
+                this.telemetryClient.TrackEvent("invite link created", telemetryData);
             }
 
             return inviteLink;
