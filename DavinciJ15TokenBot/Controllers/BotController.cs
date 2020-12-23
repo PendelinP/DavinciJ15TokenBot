@@ -2,6 +2,7 @@
 using DavinciJ15TokenBot.Common.Interfaces;
 using DavinciJ15TokenBot.Common.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
@@ -20,17 +21,22 @@ namespace DavinciJ15TokenBot.Controllers
         private readonly IEthereumMessageSigner ethereumMessageSigner;
         private readonly IEthereumConnector ethereumConnector;
         private readonly IDataManager dataManager;
+        private readonly IMemoryCache memoryCache;
         private readonly TelegramBotClient client;
         private readonly long channelChatId;
         private readonly TimeSpan holdingsTimeWindow;
         private readonly decimal minTokenCount;
 
-        public BotController(IConfiguration configuration, IEthereumMessageSigner ethereumMessageSigner, IEthereumConnector ethereumConnector, IDataManager dataManager)
+        private static string InviteLinkCacheKey = "InviteLink";
+
+        public BotController(IConfiguration configuration, IEthereumMessageSigner ethereumMessageSigner, IEthereumConnector ethereumConnector, IDataManager dataManager, IMemoryCache memoryCache)
         {
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             this.ethereumMessageSigner = ethereumMessageSigner ?? throw new ArgumentNullException(nameof(ethereumMessageSigner));
             this.ethereumConnector = ethereumConnector ?? throw new ArgumentNullException(nameof(ethereumConnector));
             this.dataManager = dataManager ?? throw new ArgumentNullException(nameof(dataManager));
+            this.memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
+
             this.client = new TelegramBotClient(this.configuration["TelegramBotToken"]);
 
             this.channelChatId = long.Parse(this.configuration["ChannelChatId"]);
@@ -137,7 +143,7 @@ namespace DavinciJ15TokenBot.Controllers
                 {
                     if(message.Text != null && message.Text == "link")
                     {
-                        var link = await client.ExportChatInviteLinkAsync(this.channelChatId);
+                        var link = await this.GetInviteLinkAsync();
 
                         await this.TrySendMessageAsync(message.Chat.Id, link);
 
@@ -146,7 +152,9 @@ namespace DavinciJ15TokenBot.Controllers
 
                     if (message.Text != null && message.Text == "invitemessage")
                     {
-                        await this.TrySendMessageAsync(message.Chat.Id, this.configuration["RegistrationSuccessfulMessage"]);
+                        var link = await this.GetInviteLinkAsync();
+
+                        await this.TrySendMessageAsync(message.Chat.Id, string.Format(this.configuration["RegistrationSuccessfulMessage"], link));
 
                         return this.Ok();
                     }
@@ -210,8 +218,9 @@ namespace DavinciJ15TokenBot.Controllers
 
                         // var balance = await this.ethereumConnector.GetAccountBalanceAsync(result.Address, contractAddress, tokenDecimals);
 
-                        await this.TrySendMessageAsync(message.Chat.Id, this.configuration["RegistrationSuccessfulMessage"]);
+                        var link = await this.GetInviteLinkAsync();
 
+                        await this.TrySendMessageAsync(message.Chat.Id, string.Format(this.configuration["RegistrationSuccessfulMessage"], link));
                     }
                 }
             }
@@ -299,6 +308,25 @@ namespace DavinciJ15TokenBot.Controllers
                 Address = address,
                 Signature = signaturePart
             };
+        }
+
+        private async Task<string> GetInviteLinkAsync()
+        {
+            var inviteLink = string.Empty;
+
+            if (!this.memoryCache.TryGetValue(InviteLinkCacheKey, out inviteLink))
+            {
+                inviteLink = await this.client.ExportChatInviteLinkAsync(this.channelChatId);
+
+                // cache current invite link for a certain amount of time
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromHours(11));
+
+                // Save data in cache.
+                this.memoryCache.Set(InviteLinkCacheKey, inviteLink, cacheEntryOptions);
+            }
+
+            return inviteLink;
         }
     }
 }
