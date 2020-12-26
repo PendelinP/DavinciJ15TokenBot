@@ -339,7 +339,7 @@ namespace DavinciJ15TokenBot.Controllers
 
                 // cache current invite link for a certain amount of time
                 var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromHours(11));
+                    .SetAbsoluteExpiration(TimeSpan.FromHours(11));
 
                 // Save data in cache.
                 this.memoryCache.Set(InviteLinkCacheKey, inviteLink, cacheEntryOptions);
